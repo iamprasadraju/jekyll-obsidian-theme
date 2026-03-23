@@ -1,0 +1,176 @@
+<p>This note demonstrates all supported markdown features in the Obsidian theme.</p>
+
+<h2 id="text-formatting">Text Formatting</h2>
+
+<ul>
+  <li><strong>Bold text</strong> with <code class="language-plaintext highlighter-rouge">**double asterisks**</code></li>
+  <li><em>Italic text</em> with <code class="language-plaintext highlighter-rouge">*single asterisks*</code></li>
+  <li><del>Strikethrough</del> with <code class="language-plaintext highlighter-rouge">~~double tildes~~</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Inline code</code> with backticks</li>
+  <li>==Highlighted text== (if supported)</li>
+</ul>
+
+<h2 id="links">Links</h2>
+
+<h3 id="external-links">External Links</h3>
+<ul>
+  <li><a href="https://github.com">GitHub</a></li>
+  <li><a href="https://obsidian.md">Obsidian</a></li>
+</ul>
+
+<h3 id="wikilinks-internal-links">Wikilinks (Internal Links)</h3>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">[[note-name]]</code> — Basic wikilink</li>
+  <li><code class="language-plaintext highlighter-rouge">[[note-name|Display Text]]</code> — Wikilink with alias</li>
+</ul>
+
+<p>Examples:</p>
+<ul>
+  <li><a href="/concepts/zettelkasten/" class="wikilink" data-wikilink-target="concepts/zettelkasten">Zettelkasten Method</a></li>
+  <li><a href="/guides/getting-started/" class="wikilink" data-wikilink-target="guides/getting-started">Getting Started</a></li>
+</ul>
+
+<h2 id="lists">Lists</h2>
+
+<h3 id="unordered-list">Unordered List</h3>
+<ul>
+  <li>First item</li>
+  <li>Second item
+    <ul>
+      <li>Nested item</li>
+      <li>Another nested item</li>
+    </ul>
+  </li>
+  <li>Third item</li>
+</ul>
+
+<h3 id="ordered-list">Ordered List</h3>
+<ol>
+  <li>First step</li>
+  <li>Second step</li>
+  <li>Third step</li>
+</ol>
+
+<h3 id="task-list">Task List</h3>
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Create vault structure</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Add wikilink support</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Implement search</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Add graph view</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Mobile optimization</li>
+</ul>
+
+<h2 id="blockquotes">Blockquotes</h2>
+
+<blockquote>
+  <p>This is a regular blockquote.
+It can span multiple lines.</p>
+</blockquote>
+
+<h3 id="obsidian-callouts">Obsidian Callouts</h3>
+
+<div class='callout' data-callout='note'><div class='callout-header'><span class='callout-icon'><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></span><span class='callout-title'>Note</span><span class='callout-fold'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M7 10l5 5 5-5z'/></svg></span></div><div class='callout-content'><p>Notes are for general information and documentation.</p></div></div>
+
+<div class='callout' data-callout='tip'><div class='callout-header'><span class='callout-icon'><svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg></span><span class='callout-title'>Tip</span><span class='callout-fold'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M7 10l5 5 5-5z'/></svg></span></div><div class='callout-content'><p>Tips provide helpful suggestions and best practices.</p></div></div>
+
+<div class='callout' data-callout='info'><div class='callout-header'><span class='callout-icon'><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></span><span class='callout-title'>Info</span><span class='callout-fold'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M7 10l5 5 5-5z'/></svg></span></div><div class='callout-content'><p>Info callouts are great for supplementary information.</p></div></div>
+
+<div class='callout' data-callout='warning'><div class='callout-header'><span class='callout-icon'><svg viewBox="0 0 24 24"><path fill="currentColor" d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg></span><span class='callout-title'>Warning</span><span class='callout-fold'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M7 10l5 5 5-5z'/></svg></span></div><div class='callout-content'><p>Warnings alert users to potential issues or important considerations.</p></div></div>
+
+<div class='callout' data-callout='danger'><div class='callout-header'><span class='callout-icon'><svg viewBox="0 0 24 24"><path fill="currentColor" d="M15.73 3H8.27L3 8.27v7.46L8.27 21h7.46L21 15.73V8.27L15.73 3zM17 15.75l-1.41 1.41L12 13.58l-3.59 3.59L7 15.75 10.59 12.16 7 8.41 8.41 7l3.59 3.59L15.59 7 17 8.41 13.41 12.16 17 15.75z"/></svg></span><span class='callout-title'>Danger</span><span class='callout-fold'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M7 10l5 5 5-5z'/></svg></span></div><div class='callout-content'><p>Danger callouts highlight critical information that requires attention.</p></div></div>
+
+<div class='callout' data-callout='example'><div class='callout-header'><span class='callout-icon'><svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg></span><span class='callout-title'>Example</span><span class='callout-fold'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M7 10l5 5 5-5z'/></svg></span></div><div class='callout-content'><p>Examples demonstrate concepts in practice.</p></div></div>
+
+<div class='callout' data-callout='quote'><div class='callout-header'><span class='callout-icon'><svg viewBox="0 0 24 24"><path fill="currentColor" d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg></span><span class='callout-title'>Quote</span><span class='callout-fold'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M7 10l5 5 5-5z'/></svg></span></div><div class='callout-content'><p>“The best way to predict the future is to create it.” — Peter Drucker</p></div></div>
+
+<h2 id="code">Code</h2>
+
+<h3 id="inline-code">Inline Code</h3>
+<p>Use <code class="language-plaintext highlighter-rouge">git status</code> to check the state of your repository.</p>
+
+<h3 id="code-blocks">Code Blocks</h3>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ObsidianTheme</span>
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+    <span class="vi">@name</span> <span class="o">=</span> <span class="nb">name</span>
+    <span class="vi">@features</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">add_feature</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+    <span class="vi">@features</span> <span class="o">&lt;&lt;</span> <span class="n">feature</span>
+    <span class="nb">puts</span> <span class="s2">"Added </span><span class="si">#{</span><span class="n">feature</span><span class="si">}</span><span class="s2"> to </span><span class="si">#{</span><span class="vi">@name</span><span class="si">}</span><span class="s2">"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.obsidian-theme</span> <span class="p">{</span>
+  <span class="py">--bg-primary</span><span class="p">:</span> <span class="nx">#202225</span><span class="p">;</span>
+  <span class="py">--text-normal</span><span class="p">:</span> <span class="nx">#dcddde</span><span class="p">;</span>
+  <span class="py">--accent</span><span class="p">:</span> <span class="nx">#7c3aed</span><span class="p">;</span>
+
+  <span class="nl">display</span><span class="p">:</span> <span class="nb">grid</span><span class="p">;</span>
+  <span class="nl">grid-template-columns</span><span class="p">:</span> <span class="m">260px</span> <span class="m">1fr</span> <span class="m">280px</span><span class="p">;</span>
+  <span class="nl">height</span><span class="p">:</span> <span class="m">100vh</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="tables">Tables</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Status</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Wikilinks</td>
+      <td>Done</td>
+      <td><a href="javascript:void(0)" class="wikilink-broken" data-wikilink-target="note-name" title="Note not found: note-name">note-name</a> syntax</td>
+    </tr>
+    <tr>
+      <td>Backlinks</td>
+      <td>Done</td>
+      <td>Auto-generated</td>
+    </tr>
+    <tr>
+      <td>Search</td>
+      <td>Done</td>
+      <td>Ctrl+K command palette</td>
+    </tr>
+    <tr>
+      <td>Graph view</td>
+      <td>Done</td>
+      <td>Vis.js network</td>
+    </tr>
+    <tr>
+      <td>Tags</td>
+      <td>Done</td>
+      <td>Inline tag support</td>
+    </tr>
+    <tr>
+      <td>Callouts</td>
+      <td>Done</td>
+      <td>Obsidian-style</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="images">Images</h2>
+
+<p>Images work with standard markdown syntax:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">![</span><span class="nv">Alt text</span><span class="p">](</span><span class="sx">/path/to/image.png</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="horizontal-rules">Horizontal Rules</h2>
+
+<hr />
+
+<h2 id="tags">Tags</h2>
+
+<p>This note is tagged with: #guide #markdown #syntax</p>
+
+<p>Check the tag pages to see all notes with these tags.</p>

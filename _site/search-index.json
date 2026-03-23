@@ -1,0 +1,74 @@
+[
+  {
+    "title": "Evergreen Notes",
+    "url": "/concepts/evergreen-notes/",
+    "path": "concepts/evergreen-notes",
+    "content": "Evergreen Notes are a concept developed by Andy Matuschak as an evolution of the Zettelkasten method. What Are Evergreen Notes? Evergreen notes are notes that are: 1. Atomic — One idea per note 2. Concept-oriented — Organized by concept, not by source 3. Densely linked — Connected to many other notes 4. Written for yourself — In your own words note The term \"evergreen\" comes from the idea that these notes should remain relevant and valuable over time, like evergreen trees that keep their leaves year-round. Key Principles Prefer Associative Ontology Don't organize notes by topic or category. Ins",
+    "tags": "concepts method knowledge-management",
+    "date": "2026-03-23 00:00:00 +0530"
+  },
+  {
+    "title": "Concepts",
+    "url": "/concepts/index/",
+    "path": "concepts/index",
+    "content": "Concepts Core ideas and methodologies for knowledge management. Knowledge Management Methods - Zettelkasten — The slip-box method by Niklas Luhmann - Evergreen Notes — Andy Matuschak's evolution of Zettelkasten Key Principles note Concepts are the building blocks of understanding. Each concept note captures a single idea that can be connected to others. Atomicity Each note should capture one idea, clearly and completely. Connectivity Notes become powerful when linked. The web of connections creates emergent understanding. Iteration Notes should evolve over time. Revisit and refine as your under",
+    "tags": "index",
+    "date": "2026-03-23 00:00:00 +0530"
+  },
+  {
+    "title": "Zettelkasten",
+    "url": "/concepts/zettelkasten/",
+    "path": "concepts/zettelkasten",
+    "content": "The Zettelkasten German for \"slip box\" is a personal knowledge management system popularized by the sociologist Niklas Luhmann. Core Principles 1. Atomic Notes — Each note captures a single idea 2. Connections — Notes are linked to create a web of knowledge 3. Unique Identifiers — Each note has a permanent ID 4. Own Words — Ideas are rephrased in your own understanding How It Works The Zettelkasten method works by creating small, atomic notes that capture individual ideas. These notes are then connected through links, creating a network of knowledge that grows organically over time. tip The pow",
+    "tags": "concepts method knowledge-management",
+    "date": "2026-03-23 00:00:00 +0530"
+  },
+  {
+    "title": "Daily Note - March 23, 2026",
+    "url": "/daily/2026-03-23/",
+    "path": "daily/2026-03-23",
+    "content": "Tasks - x Set up vault structure - x Implement wikilinks - x Add backlinks system - Test graph view - Write documentation Notes Today I started building the Obsidian Jekyll theme. The core structure is in place with: - 3-column layout matching Obsidian's design - Wikilinks using syntax - Backlinks automatically generated from link references - Command palette with shortcut Links - Project Alpha - Zettelkasten - Getting Started Reflections tip The hardest part was getting the wikilink plugin to properly resolve paths and build the backlinks index. The solution was to use Jekyll's hook to process",
+    "tags": "daily",
+    "date": "2026-03-23 00:00:00 +0530"
+  },
+  {
+    "title": "Daily Notes Template",
+    "url": "/daily/template/",
+    "path": "daily/template",
+    "content": "Tasks - Task 1 - Task 2 - Task 3 Notes Links Reflections --- Tags:",
+    "tags": "daily template",
+    "date": null
+  },
+  {
+    "title": "Getting Started",
+    "url": "/guides/getting-started/",
+    "path": "guides/getting-started",
+    "content": "Welcome to your Obsidian-powered Jekyll vault This guide will walk you through the key features. Quick Start 1. Create notes in the directory 2. Link notes using syntax 3. Add tags with `bundle exec jekyll buildbundle exec jekyll servenote-titleCustom DisplayCtrl/Cmd + KCtrl/Cmd + BEsc` Close modals Next Steps - Explore the Concepts folder - Check out Projects - Read about Markdown Features",
+    "tags": "guide setup",
+    "date": "2026-03-23 00:00:00 +0530"
+  },
+  {
+    "title": "Markdown Features",
+    "url": "/guides/markdown-features/",
+    "path": "guides/markdown-features",
+    "content": "This note demonstrates all supported markdown features in the Obsidian theme. Text Formatting - Bold text with - Italic text with - Strikethrough with - with backticks - ==Highlighted text== if supported Links External Links - GitHubhttps://github.com - Obsidianhttps://obsidian.md Wikilinks Internal Links - — Basic wikilink - — Wikilink with alias Examples: - Zettelkasten Method - Getting Started Lists Unordered List - First item - Second item - Nested item - Another nested item - Third item Ordered List 1. First step 2. Second step 3. Third step Task List - x Create vault structure - x Add wik",
+    "tags": "guide markdown syntax",
+    "date": "2026-03-23 00:00:00 +0530"
+  },
+  {
+    "title": "Projects",
+    "url": "/projects/index/",
+    "path": "projects/index",
+    "content": "Projects Active and archived projects tracked in this vault. Active Projects - Project Alpha — Obsidian Jekyll Theme Project Templates tip Use this section to track project progress, decisions, and related notes. Project Structure Each project note should include: - Goal — What are you trying to achieve? - Status — Current state planning, in progress, done - Notes — Links to relevant concept and reference notes - Timeline — Key milestones and deadlines Related - Zettelkasten — Knowledge management method - Getting Started — Vault setup guide",
+    "tags": "index",
+    "date": "2026-03-23 00:00:00 +0530"
+  },
+  {
+    "title": "Project Alpha",
+    "url": "/projects/project-alpha/",
+    "path": "projects/project-alpha",
+    "content": "Project Alpha: Obsidian Jekyll Theme Goal Create a Jekyll theme that replicates the look and feel of the Obsidian note-taking app. Status 🚧 In Progress Features Implemented - x Dark-first UI with light mode toggle - x 3-column layout left sidebar, content, right sidebar - x Wikilink support with syntax - x Backlinks system - x Command palette search - x Auto-generated table of contents - x Obsidian-style callouts - x Tag system with `` support - x Graph view with Vis.js Planned - Mermaid.js diagram support - MathJax equation rendering - Daily notes template - Quick capture feature - Plugin syst",
+    "tags": "project theme jekyll",
+    "date": "2026-03-23 00:00:00 +0530"
+  }
+]

@@ -1,0 +1,144 @@
+// Syntax highlighting - GitHub Dark inspired
+
+.highlight,
+pre.highlight,
+div.highlighter-rouge,
+figure.highlight {
+  background: var(--bg-code) !important;
+  color: var(--code-text) !important;
+  border-radius: var(--radius);
+  overflow: auto;
+  margin-bottom: var(--sp-4);
+  border: 1px solid var(--border);
+  position: relative;
+
+  // Copy button
+  .copy-btn {
+    position: absolute;
+    top: var(--sp-2);
+    right: var(--sp-2);
+    padding: var(--sp-1) var(--sp-2);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+    opacity: 0;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--hover);
+      color: var(--text-normal);
+    }
+
+    &.copied {
+      color: var(--callout-tip);
+    }
+  }
+
+  &:hover .copy-btn {
+    opacity: 1;
+  }
+}
+
+pre,
+.highlight pre,
+.highlight code {
+  background: transparent !important;
+  color: var(--code-text) !important;
+}
+
+// Language label
+.highlight {
+  .language-label {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: var(--sp-1) var(--sp-3);
+    font-size: var(--font-size-xs);
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    user-select: none;
+  }
+}
+
+// Token colors
+.highlight {
+  .c,
+  .c1,
+  .cm,
+  .cs,
+  .ch {
+    color: var(--code-comment);
+    font-style: italic;
+  }
+
+  .k,
+  .kd,
+  .kn,
+  .kp,
+  .kr,
+  .kt,
+  .kc {
+    color: var(--code-keyword);
+  }
+
+  .s,
+  .s1,
+  .s2,
+  .sb,
+  .sc,
+  .sd,
+  .sh,
+  .sx {
+    color: var(--code-string);
+  }
+
+  .m,
+  .mi,
+  .mf,
+  .mh,
+  .mo,
+  .il {
+    color: var(--code-number);
+  }
+
+  .nf,
+  .fm,
+  .fn {
+    color: var(--code-function);
+  }
+
+  .n,
+  .na,
+  .nb,
+  .nc,
+  .nd,
+  .ne,
+  .ni,
+  .nl,
+  .nn,
+  .no,
+  .nv,
+  .vc,
+  .vg,
+  .vi {
+    color: var(--code-variable);
+  }
+
+  .o,
+  .ow,
+  .p {
+    color: var(--code-operator);
+  }
+
+  .err {
+    color: var(--callout-danger);
+  }
+
+  .gp {
+    color: var(--text-faint);
+  }
+}

@@ -1,0 +1,48 @@
+---
+layout: default
+---
+
+<h1>#{{ page.tag }}</h1>
+<p class="text-muted">Notes tagged with <strong>#{{ page.tag }}</strong></p>
+
+<div class="tag-page-notes">
+  {% assign tag_notes = site.notes | where_exp: "note", "page.notes contains
+  note.url" %} {% for note in tag_notes %}
+  <div class="tag-note-item">
+    <a href="{{ note.url | relative_url }}" class="wikilink"
+      >{{ note.title }}</a
+    >
+    {% if note.date %}
+    <span
+      class="text-muted"
+      style="font-size: var(--font-size-xs); margin-left: var(--sp-2)"
+      >{{ note.date | date: "%b %d, %Y" }}</span
+    >
+    {% endif %} {% if note.description %}
+    <p
+      style="
+        font-size: var(--font-size-sm);
+        color: var(--text-muted);
+        margin-top: var(--sp-1);
+      "
+    >
+      {{ note.description | truncatewords: 30 }}
+    </p>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<p style="margin-top: var(--sp-8)">
+  <a href="{{ '/tags/' | relative_url }}">&larr; All tags</a>
+</p>
+
+<style>
+  .tag-note-item {
+    padding: var(--sp-3) 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .tag-note-item:last-child {
+    border-bottom: none;
+  }
+</style>

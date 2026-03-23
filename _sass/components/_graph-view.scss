@@ -1,0 +1,87 @@
+// Graph View
+
+.graph-view-container {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--bg-primary);
+
+  &.is-open {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.graph-view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-3) var(--sp-4);
+  height: var(--header-height);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.graph-view-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-normal);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+
+  svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    color: var(--accent);
+  }
+}
+
+.graph-view-actions {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.graph-view-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+
+  &:hover {
+    background: var(--hover);
+    color: var(--text-normal);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+}
+
+.graph-view-canvas {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+// Graph in sidebar (mini)
+.graph-sidebar {
+  height: 200px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-top: var(--sp-2);
+
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}

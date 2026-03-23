@@ -1,0 +1,128 @@
+// Base element styles
+
+// Headings with anchor links
+.note-content {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    position: relative;
+
+    .heading-anchor {
+      position: absolute;
+      left: -1.2em;
+      padding-right: 0.2em;
+      color: var(--text-faint);
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+      font-weight: 400;
+      text-decoration: none;
+
+      &:hover {
+        color: var(--link);
+      }
+    }
+
+    &:hover .heading-anchor {
+      opacity: 1;
+    }
+  }
+}
+
+// Lists
+.note-content {
+  ul,
+  ol {
+    padding-left: var(--sp-6);
+    margin-bottom: var(--sp-4);
+  }
+
+  ul {
+    list-style: disc;
+  }
+
+  ol {
+    list-style: decimal;
+  }
+
+  li {
+    margin-bottom: var(--sp-1);
+
+    & > ul,
+    & > ol {
+      margin-bottom: 0;
+      margin-top: var(--sp-1);
+    }
+  }
+
+  // Task lists
+  .task-list-item {
+    list-style: none;
+    margin-left: -1.5em;
+
+    input[type="checkbox"] {
+      margin-right: 0.5em;
+      accent-color: var(--accent);
+    }
+  }
+}
+
+// Images
+.note-content {
+  img {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+}
+
+// Horizontal rules
+.note-content {
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: var(--sp-8) 0;
+  }
+}
+
+// Details/Summary (foldable)
+.note-content {
+  details {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--sp-3) var(--sp-4);
+    margin-bottom: var(--sp-4);
+    background: var(--bg-secondary);
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-normal);
+      user-select: none;
+
+      &:hover {
+        color: var(--link);
+      }
+    }
+
+    &[open] {
+      summary {
+        margin-bottom: var(--sp-3);
+      }
+    }
+  }
+}
+
+// Keyboard shortcuts
+kbd {
+  display: inline-block;
+  padding: 0.1em 0.4em;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 0 var(--border);
+}

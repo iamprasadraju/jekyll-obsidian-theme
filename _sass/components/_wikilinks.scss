@@ -1,0 +1,46 @@
+// Wikilink Styling
+
+.wikilink {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all var(--transition-fast);
+  padding: 0 1px;
+  border-radius: 2px;
+
+  &:hover {
+    color: var(--link-hover);
+    border-bottom-color: var(--link-hover);
+    background: var(--accent-muted);
+  }
+}
+
+.wikilink-broken {
+  color: var(--callout-danger);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--callout-danger);
+  padding: 0 1px;
+  border-radius: 2px;
+
+  &:hover {
+    background: var(--callout-danger-bg);
+  }
+}
+
+// Tag links
+.tag {
+  display: inline-block;
+  padding: 1px var(--sp-2);
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: background var(--transition-fast);
+  line-height: 1.6;
+
+  &:hover {
+    background: var(--tag-hover-bg);
+    color: var(--tag-text);
+  }
+}

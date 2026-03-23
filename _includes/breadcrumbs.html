@@ -1,0 +1,30 @@
+{% assign url_parts = page.url | remove_first: "/" | split: "/" %}
+{% if url_parts.size > 1 %}
+<nav class="breadcrumbs">
+  <div class="breadcrumb-item">
+    <a href="{{ '/' | relative_url }}" class="breadcrumb-link">Home</a>
+  </div>
+
+  {% assign breadcrumb_path = "" %}
+  {% for part in url_parts %}
+    {% if forloop.last %}
+      <span class="breadcrumb-sep">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+      </span>
+      <span class="breadcrumb-current">{{ page.title | default: part | remove: ".html" }}</span>
+    {% else %}
+      {% assign breadcrumb_path = breadcrumb_path | append: "/" | append: part %}
+      <div class="breadcrumb-item">
+        <a href="{{ breadcrumb_path | append: "/" | relative_url }}" class="breadcrumb-link">{{ part | capitalize }}</a>
+      </div>
+      <span class="breadcrumb-sep">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+      </span>
+    {% endif %}
+  {% endfor %}
+</nav>
+{% else %}
+<div class="breadcrumbs">
+  <span class="breadcrumb-current">{{ page.title | default: site.title }}</span>
+</div>
+{% endif %}

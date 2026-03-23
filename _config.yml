@@ -1,0 +1,108 @@
+# Obsidian Theme for Jekyll
+# A note-taking focused Jekyll theme inspired by Obsidian
+
+title: "My Vault"
+description: "A personal knowledge base"
+baseurl: ""
+url: ""
+
+permalink: pretty
+
+# Collections
+collections:
+  notes:
+    output: true
+    permalink: /:path/
+
+# Strip the collection name from paths
+# Jekyll's :path includes the collection directory, so we use a custom permalink
+# Notes at _notes/concepts/zettelkasten.md → /concepts/zettelkasten/
+
+defaults:
+  - scope:
+      path: ""
+      type: "notes"
+    values:
+      layout: "note"
+      toc: true
+      backlinks: true
+
+# Obsidian Theme Settings
+obsidian:
+  # Default color scheme: "dark" or "light"
+  color_scheme: dark
+  # Left sidebar
+  sidebar_left:
+    enabled: true
+    width: 260
+  # Right sidebar
+  sidebar_right:
+    enabled: true
+    width: 280
+  # Search
+  search:
+    enabled: true
+    shortcut: "k"
+  # Graph view
+  graph:
+    enabled: true
+    lazy_load: true
+  # Tags
+  tags:
+    enabled: true
+  # Code
+  code:
+    copy_button: true
+    syntax_highlight: true
+  # Callouts
+  callouts:
+    note:
+      color: "#60a5fa"
+      icon: "info-circle"
+    tip:
+      color: "#34d399"
+      icon: "lightbulb"
+    info:
+      color: "#60a5fa"
+      icon: "info"
+    warning:
+      color: "#fbbf24"
+      icon: "exclamation-triangle"
+    danger:
+      color: "#f87171"
+      icon: "fire"
+    example:
+      color: "#c084fc"
+      icon: "list-ol"
+    quote:
+      color: "#9ca3af"
+      icon: "quote-left"
+  # Optional features
+  mermaid: false
+  mathjax: false
+
+# Markdown processing
+kramdown:
+  auto_ids: true
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+
+# Plugins
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Exclude from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - README.md
+  - ".jekyll-cache"
+  - vendor
+
+# Include dotfiles
+include:
+  - _notes

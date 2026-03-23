@@ -1,0 +1,59 @@
+---
+layout: default
+---
+
+<h1>Tags</h1>
+<p class="text-muted">All tags in this vault</p>
+
+<div class="tags-cloud">
+  {% assign sorted_tags = page.tags | sort: "count" | reverse %} {% for
+  tag_entry in sorted_tags %}
+  <a
+    href="{{ '/tags/' | append: tag_entry.name | append: '/' | relative_url }}"
+    class="tag-cloud-item"
+    style="--tag-weight: {{ tag_entry.count }}"
+  >
+    <span class="tag-cloud-name">#{{ tag_entry.name }}</span>
+    <span class="tag-cloud-count">{{ tag_entry.count }}</span>
+  </a>
+  {% endfor %}
+</div>
+
+<style>
+  .tags-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+    margin-top: var(--sp-6);
+  }
+
+  .tag-cloud-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-4);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-normal);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    font-size: calc(
+      var(--font-size-sm) + min(var(--tag-weight, 1) * 0.5px, 4px)
+    );
+  }
+
+  .tag-cloud-item:hover {
+    background: var(--hover);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .tag-cloud-count {
+    font-size: var(--font-size-xs);
+    color: var(--text-faint);
+    background: var(--bg-tertiary);
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+</style>

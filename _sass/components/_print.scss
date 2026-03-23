@@ -1,0 +1,130 @@
+// Print Stylesheet
+// Hides sidebars, header, graph view; optimizes content for printing
+
+@media print {
+  // Hide app chrome
+  .sidebar-left,
+  .sidebar-right,
+  .main-header,
+  .mobile-header,
+  .sidebar-left-overlay,
+  .sidebar-right-overlay,
+  .search-modal,
+  .graph-view-container,
+  .copy-btn,
+  .heading-anchor,
+  .backlinks-section {
+    display: none !important;
+  }
+
+  // Reset layout
+  .app-layout {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .main-area {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .content-wrapper {
+    padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  .note-content {
+    max-width: 100% !important;
+  }
+
+  // Typography
+  body {
+    color: #000 !important;
+    background: #fff !important;
+    font-size: 12pt !important;
+    line-height: 1.5 !important;
+  }
+
+  a {
+    color: #000 !important;
+    text-decoration: underline !important;
+  }
+
+  // Show URL after links
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666 !important;
+  }
+
+  // Don't show URL for wikilinks (internal links)
+  a.wikilink::after,
+  a.tag::after {
+    content: none !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: #000 !important;
+    page-break-after: avoid;
+  }
+
+  pre,
+  code {
+    background: #f5f5f5 !important;
+    color: #000 !important;
+    border: 1px solid #ddd !important;
+  }
+
+  // Callouts print styling
+  .callout {
+    border: 1px solid #ccc !important;
+    background: #f9f9f9 !important;
+    page-break-inside: avoid;
+  }
+
+  .callout-header {
+    background: #f0f0f0 !important;
+    color: #333 !important;
+  }
+
+  .callout-content {
+    background: #f9f9f9 !important;
+  }
+
+  // Tables
+  table {
+    border-collapse: collapse !important;
+  }
+
+  th,
+  td {
+    border: 1px solid #ccc !important;
+  }
+
+  // Embeds
+  .note-embed {
+    border: 1px solid #ccc !important;
+    background: #f9f9f9 !important;
+  }
+
+  // Tags
+  .tag,
+  .sidebar-tag {
+    background: #f0f0f0 !important;
+    color: #333 !important;
+    border: 1px solid #ccc !important;
+  }
+
+  // Page breaks
+  .note-embed {
+    page-break-inside: avoid;
+  }
+}

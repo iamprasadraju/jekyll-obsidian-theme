@@ -1,0 +1,72 @@
+// Light Theme Overrides
+// Applied when html[data-theme="light"]
+
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #ebebeb;
+  --bg-elevated: #ffffff;
+  --bg-overlay: rgba(0, 0, 0, 0.3);
+  --bg-code: #f6f8fa;
+
+  --text-normal: #1f2328;
+  --text-muted: #57606a;
+  --text-faint: #8b949e;
+  --text-on-accent: #ffffff;
+
+  --accent: #7c3aed;
+  --accent-hover: #6d28d9;
+  --accent-muted: rgba(124, 58, 237, 0.1);
+
+  --link: #0969da;
+  --link-hover: #0550ae;
+
+  --border: #d0d7de;
+  --border-hover: #afb8c1;
+  --border-active: #7c3aed;
+
+  --hover: #f3f4f6;
+  --active: #e5e7eb;
+
+  // Callout colors - light
+  --callout-note: #0969da;
+  --callout-note-bg: rgba(9, 105, 218, 0.05);
+  --callout-tip: #1a7f37;
+  --callout-tip-bg: rgba(26, 127, 55, 0.05);
+  --callout-info: #0969da;
+  --callout-info-bg: rgba(9, 105, 218, 0.05);
+  --callout-warning: #9a6700;
+  --callout-warning-bg: rgba(154, 103, 0, 0.05);
+  --callout-danger: #cf222e;
+  --callout-danger-bg: rgba(207, 34, 46, 0.05);
+  --callout-example: #8250df;
+  --callout-example-bg: rgba(130, 80, 223, 0.05);
+  --callout-quote: #57606a;
+  --callout-quote-bg: rgba(87, 96, 106, 0.05);
+
+  // Code - light (GitHub-style)
+  --code-text: #1f2328;
+  --code-comment: #6e7781;
+  --code-keyword: #cf222e;
+  --code-string: #0a3069;
+  --code-number: #0550ae;
+  --code-function: #6639ba;
+  --code-variable: #953800;
+  --code-operator: #cf222e;
+
+  // Tags - light
+  --tag-bg: rgba(124, 58, 237, 0.1);
+  --tag-text: #6d28d9;
+  --tag-hover-bg: rgba(124, 58, 237, 0.18);
+
+  // Scrollbar - light
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+
+  // Shadows - light
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
+}

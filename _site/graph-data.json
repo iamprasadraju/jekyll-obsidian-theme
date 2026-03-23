@@ -1,0 +1,195 @@
+{
+  "nodes": [
+    {
+      "id": 0,
+      "label": "Evergreen Notes",
+      "url": "/concepts/evergreen-notes/",
+      "group": "concepts"
+    },
+    {
+      "id": 1,
+      "label": "Concepts",
+      "url": "/concepts/index/",
+      "group": "concepts"
+    },
+    {
+      "id": 2,
+      "label": "Zettelkasten",
+      "url": "/concepts/zettelkasten/",
+      "group": "concepts"
+    },
+    {
+      "id": 3,
+      "label": "Daily Note - March 23, 2026",
+      "url": "/daily/2026-03-23/",
+      "group": "daily"
+    },
+    {
+      "id": 4,
+      "label": "Daily Notes Template",
+      "url": "/daily/template/",
+      "group": "daily"
+    },
+    {
+      "id": 5,
+      "label": "Getting Started",
+      "url": "/guides/getting-started/",
+      "group": "guides"
+    },
+    {
+      "id": 6,
+      "label": "Markdown Features",
+      "url": "/guides/markdown-features/",
+      "group": "guides"
+    },
+    {
+      "id": 7,
+      "label": "Projects",
+      "url": "/projects/index/",
+      "group": "projects"
+    },
+    {
+      "id": 8,
+      "label": "Project Alpha",
+      "url": "/projects/project-alpha/",
+      "group": "projects"
+    }
+  ],
+  "edges": [
+    {
+      "from": 0,
+      "to": 2,
+      "id": 0
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "id": 1
+    },
+    {
+      "from": 3,
+      "to": 2,
+      "id": 2
+    },
+    {
+      "from": 5,
+      "to": 2,
+      "id": 3
+    },
+    {
+      "from": 6,
+      "to": 2,
+      "id": 4
+    },
+    {
+      "from": 7,
+      "to": 2,
+      "id": 5
+    },
+    {
+      "from": 8,
+      "to": 2,
+      "id": 6
+    },
+    {
+      "from": 0,
+      "to": 6,
+      "id": 7
+    },
+    {
+      "from": 1,
+      "to": 6,
+      "id": 8
+    },
+    {
+      "from": 5,
+      "to": 6,
+      "id": 9
+    },
+    {
+      "from": 8,
+      "to": 6,
+      "id": 10
+    },
+    {
+      "from": 0,
+      "to": 5,
+      "id": 11
+    },
+    {
+      "from": 1,
+      "to": 5,
+      "id": 12
+    },
+    {
+      "from": 2,
+      "to": 5,
+      "id": 13
+    },
+    {
+      "from": 3,
+      "to": 5,
+      "id": 14
+    },
+    {
+      "from": 6,
+      "to": 5,
+      "id": 15
+    },
+    {
+      "from": 7,
+      "to": 5,
+      "id": 16
+    },
+    {
+      "from": 8,
+      "to": 5,
+      "id": 17
+    },
+    {
+      "from": 0,
+      "to": 1,
+      "id": 18
+    },
+    {
+      "from": 5,
+      "to": 1,
+      "id": 19
+    },
+    {
+      "from": 1,
+      "to": 0,
+      "id": 20
+    },
+    {
+      "from": 2,
+      "to": 0,
+      "id": 21
+    },
+    {
+      "from": 5,
+      "to": 0,
+      "id": 22
+    },
+    {
+      "from": 8,
+      "to": 0,
+      "id": 23
+    },
+    {
+      "from": 3,
+      "to": 8,
+      "id": 24
+    },
+    {
+      "from": 7,
+      "to": 8,
+      "id": 25
+    },
+    {
+      "from": 5,
+      "to": 7,
+      "id": 26
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+// 3-Column App Layout
+
+.app-layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-left-width) 1fr var(
+      --sidebar-right-width
+    );
+  grid-template-rows: 1fr;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+// ─── Left Sidebar ──────────────────────────────────────
+.sidebar-left {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  height: 100vh;
+  overflow: hidden;
+  z-index: 10;
+  transition: transform var(--transition-slow);
+}
+
+// ─── Main Area ─────────────────────────────────────────
+.main-area {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.content-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--sp-8) var(--sp-8);
+}
+
+.note-content {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+
+// ─── Right Sidebar ─────────────────────────────────────
+.sidebar-right {
+  grid-column: 3;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border);
+  height: 100vh;
+  overflow: hidden;
+  z-index: 10;
+  transition: transform var(--transition-slow);
+}
+
+// ─── Sidebar Sections ──────────────────────────────────
+.sidebar-section {
+  padding: var(--sp-4);
+  border-bottom: 1px solid var(--border);
+
+  &:last-child {
+    border-bottom: none;
+    flex: 1;
+    overflow-y: auto;
+  }
+}
+
+.sidebar-section-title {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+  margin-bottom: var(--sp-3);
+  user-select: none;
+}
+
+// ─── Responsive ────────────────────────────────────────
+
+// Hide right sidebar below xl (1280px)
+@media (max-width: 1280px) {
+  .app-layout {
+    grid-template-columns: var(--sidebar-left-width) 1fr;
+  }
+
+  .sidebar-right {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: var(--sidebar-right-width);
+    transform: translateX(100%);
+
+    &.is-open {
+      transform: translateX(0);
+      box-shadow: var(--shadow-xl);
+    }
+  }
+
+  .sidebar-right-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg-overlay);
+    z-index: 9;
+
+    &.is-open {
+      display: block;
+    }
+  }
+}
+
+// Collapse left sidebar below lg (1024px)
+@media (max-width: 1024px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar-left {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: var(--sidebar-left-width);
+    transform: translateX(-100%);
+
+    &.is-open {
+      transform: translateX(0);
+      box-shadow: var(--shadow-xl);
+    }
+  }
+
+  .sidebar-left-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg-overlay);
+    z-index: 9;
+
+    &.is-open {
+      display: block;
+    }
+  }
+
+  .main-area {
+    grid-column: 1;
+  }
+
+  .content-wrapper {
+    padding: var(--sp-5) var(--sp-4);
+  }
+
+  .mobile-header {
+    display: flex !important;
+  }
+}
+
+// Below sm - tighter spacing
+@media (max-width: 640px) {
+  .content-wrapper {
+    padding: var(--sp-4) var(--sp-3);
+  }
+
+  :root {
+    --content-max-width: 100%;
+  }
+}

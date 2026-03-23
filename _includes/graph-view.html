@@ -1,0 +1,63 @@
+<!-- Graph View -->
+<div class="graph-view-container" id="graph-view">
+  <div class="graph-view-header">
+    <div class="graph-view-title">
+      <svg viewBox="0 0 24 24">
+        <circle cx="6" cy="6" r="2.5" fill="currentColor" />
+        <circle cx="18" cy="6" r="2.5" fill="currentColor" />
+        <circle cx="6" cy="18" r="2.5" fill="currentColor" />
+        <circle cx="18" cy="18" r="2.5" fill="currentColor" />
+        <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+        <line
+          x1="6"
+          y1="6"
+          x2="12"
+          y2="12"
+          stroke="currentColor"
+          stroke-width="1.2"
+        />
+        <line
+          x1="18"
+          y1="6"
+          x2="12"
+          y2="12"
+          stroke="currentColor"
+          stroke-width="1.2"
+        />
+        <line
+          x1="6"
+          y1="18"
+          x2="12"
+          y2="12"
+          stroke="currentColor"
+          stroke-width="1.2"
+        />
+        <line
+          x1="18"
+          y1="18"
+          x2="12"
+          y2="12"
+          stroke="currentColor"
+          stroke-width="1.2"
+        />
+      </svg>
+      Graph View
+    </div>
+    <div class="graph-view-actions">
+      <button
+        class="graph-view-btn"
+        data-action="close-graph"
+        aria-label="Close graph view"
+      >
+        <svg viewBox="0 0 24 24">
+          <path
+            fill="currentColor"
+            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+          />
+        </svg>
+        Close
+      </button>
+    </div>
+  </div>
+  <div class="graph-view-canvas" id="graph-canvas"></div>
+</div>

@@ -1,0 +1,66 @@
+---
+layout: minimal
+permalink: /404.html
+title: "Page Not Found"
+---
+
+<div style="text-align: center; padding: 4rem 1rem">
+  <h1 style="font-size: 4rem; margin-bottom: 0.5rem; color: var(--text-faint)">
+    404
+  </h1>
+  <h2 style="font-size: 1.5rem; margin-bottom: 1rem">Note not found</h2>
+  <p
+    style="
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    "
+  >
+    This note doesn't exist in your vault. It may have been moved, renamed, or
+    never created.
+  </p>
+  <div
+    style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap"
+  >
+    <a href="{{ '/' | relative_url }}" class="btn-home">Go to Vault Home</a>
+    <button class="btn-search" data-action="open-search">Search Notes</button>
+  </div>
+</div>
+
+<style>
+  .btn-home {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1.25rem;
+    background: var(--accent);
+    color: var(--text-on-accent);
+    border-radius: var(--radius);
+    font-weight: 500;
+    font-size: var(--font-size-sm);
+    text-decoration: none;
+    transition: background var(--transition-fast);
+  }
+  .btn-home:hover {
+    background: var(--accent-hover);
+    color: var(--text-on-accent);
+  }
+  .btn-search {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1.25rem;
+    background: var(--bg-secondary);
+    color: var(--text-normal);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-weight: 500;
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+  .btn-search:hover {
+    background: var(--hover);
+    border-color: var(--border-hover);
+  }
+</style>

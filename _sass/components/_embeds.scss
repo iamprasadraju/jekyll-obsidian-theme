@@ -1,0 +1,59 @@
+// Note Embed Styles
+
+.note-embed {
+  margin: var(--sp-4) 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+
+.note-embed-title {
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+
+  a {
+    color: var(--link);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--link-hover);
+    }
+  }
+}
+
+.note-embed-content {
+  padding: var(--sp-3);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  max-height: 300px;
+  overflow-y: auto;
+
+  > *:first-child {
+    margin-top: 0;
+  }
+
+  > *:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.embed-error {
+  margin: var(--sp-4) 0;
+  padding: var(--sp-3);
+  border: 1px dashed var(--callout-danger);
+  border-radius: var(--radius);
+  color: var(--callout-danger);
+  font-size: var(--font-size-sm);
+  background: var(--callout-danger-bg);
+}
+
+// Note tags inline (at top of note)
+.note-tags-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+}

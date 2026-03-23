@@ -1,0 +1,40 @@
+<!-- Search Modal -->
+<div
+  class="search-modal"
+  id="search-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Search notes"
+>
+  <div class="search-modal-content">
+    <div class="search-input-wrap">
+      <span class="search-input-icon">
+        <svg viewBox="0 0 24 24">
+          <path
+            fill="currentColor"
+            d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+          />
+        </svg>
+      </span>
+      <input
+        type="text"
+        class="search-input"
+        id="search-input"
+        placeholder="Search notes..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <kbd class="search-input-shortcut" data-action="close-search">Esc</kbd>
+    </div>
+    <div class="search-results" id="search-results">
+      <div class="search-results-empty">Type to search notes...</div>
+    </div>
+    <div class="search-footer">
+      <span class="search-footer-hint"
+        ><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate</span
+      >
+      <span class="search-footer-hint"><kbd>Enter</kbd> open</span>
+      <span class="search-footer-hint"><kbd>Esc</kbd> close</span>
+    </div>
+  </div>
+</div>

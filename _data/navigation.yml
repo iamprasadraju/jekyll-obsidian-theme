@@ -1,0 +1,7 @@
+# Optional manual navigation ordering
+# If present, overrides automatic folder-based navigation
+#
+# - title: Getting Started
+#   url: /guides/getting-started/
+# - title: Markdown Features
+#   url: /guides/markdown-features/

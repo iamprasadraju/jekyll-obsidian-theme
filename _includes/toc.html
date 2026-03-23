@@ -1,0 +1,42 @@
+{% comment %}
+  Table of Contents - auto-generated from h1-h4 headings in rendered content.
+  Reliably detects heading level by checking the tag name before the id attribute.
+{% endcomment %}
+
+{% assign has_headings = false %}
+{% if content contains '<h1 ' or content contains '<h2 ' or content contains '<h3 ' or content contains '<h4 ' %}
+  {% assign has_headings = true %}
+{% endif %}
+
+{% if has_headings %}
+<div class="sidebar-section">
+  <div class="sidebar-section-title">Table of Contents</div>
+  <nav class="toc" id="toc">
+    <ul class="toc-list">
+      {% assign heading_lines = content | split: '<h' %}
+      {% for h in heading_lines %}
+        {% if forloop.first %}{% continue %}{% endif %}
+
+        {% assign tag_and_rest = h | split: '>' | first %}
+        {% assign level_char = tag_and_rest | slice: 0 %}
+
+        {% if level_char == '1' or level_char == '2' or level_char == '3' or level_char == '4' %}
+          {% assign level = level_char | plus: 0 %}
+
+          {% if tag_and_rest contains 'id="' %}
+            {% assign id = tag_and_rest | split: 'id="' | last | split: '"' | first %}
+            {% assign rest_after_tag = h | split: '>' | shift | join: '>' %}
+            {% assign text = rest_after_tag | split: '</h' | first | strip_html | strip %}
+
+            {% if id != "" and text != "" %}
+            <li class="toc-item">
+              <a href="#{{ id }}" class="toc-link toc-h{{ level }}" data-heading-id="{{ id }}">{{ text }}</a>
+            </li>
+            {% endif %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </nav>
+</div>
+{% endif %}

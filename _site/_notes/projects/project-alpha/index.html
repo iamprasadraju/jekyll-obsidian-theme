@@ -1,0 +1,104 @@
+<h1 id="project-alpha-obsidian-jekyll-theme">Project Alpha: Obsidian Jekyll Theme</h1>
+
+<h2 id="goal">Goal</h2>
+
+<p>Create a Jekyll theme that replicates the look and feel of the Obsidian note-taking app.</p>
+
+<h2 id="status">Status</h2>
+
+<p>🚧 In Progress</p>
+
+<h2 id="features">Features</h2>
+
+<h3 id="implemented">Implemented</h3>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Dark-first UI with light mode toggle</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />3-column layout (left sidebar, content, right sidebar)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Wikilink support with <code class="language-plaintext highlighter-rouge">[[note-name]]</code> syntax</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Backlinks system</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Command palette search (<code class="language-plaintext highlighter-rouge">Ctrl/Cmd + K</code>)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Auto-generated table of contents</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Obsidian-style callouts</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Tag system with <code class="language-plaintext highlighter-rouge">#hashtag</code> support</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Graph view with Vis.js</li>
+</ul>
+
+<h3 id="planned">Planned</h3>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Mermaid.js diagram support</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />MathJax equation rendering</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Daily notes template</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Quick capture feature</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Plugin system</li>
+</ul>
+
+<h2 id="technical-decisions">Technical Decisions</h2>
+
+<div class='callout' data-callout='note'><div class='callout-header'><span class='callout-icon'><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></span><span class='callout-title'>Note</span><span class='callout-fold'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M7 10l5 5 5-5z'/></svg></span></div><div class='callout-content'><p>This theme builds on patterns from just-the-docs but is a standalone implementation.</p></div></div>
+
+<h3 id="why-jekyll">Why Jekyll?</h3>
+
+<ul>
+  <li>Static site generation for fast, reliable hosting</li>
+  <li>Liquid templating for dynamic content</li>
+  <li>Ruby plugins for build-time processing</li>
+  <li>GitHub Pages compatible (with limitations)</li>
+</ul>
+
+<h3 id="why-visjs-for-graph-view">Why Vis.js for Graph View?</h3>
+
+<ul>
+  <li>Lightweight and performant</li>
+  <li>Built-in physics simulation</li>
+  <li>Interactive zoom/pan/click</li>
+  <li>Simple API</li>
+</ul>
+
+<h3 id="why-fusejs-for-search">Why Fuse.js for Search?</h3>
+
+<ul>
+  <li>Client-side fuzzy matching</li>
+  <li>No server required</li>
+  <li>Fast and lightweight</li>
+  <li>Good UX with instant results</li>
+</ul>
+
+<h2 id="related-notes">Related Notes</h2>
+
+<ul>
+  <li><a href="/concepts/zettelkasten/" class="wikilink" data-wikilink-target="concepts/zettelkasten">Zettelkasten</a> — Knowledge management method powering this vault</li>
+  <li><a href="/concepts/evergreen-notes/" class="wikilink" data-wikilink-target="concepts/evergreen-notes">Evergreen Notes</a> — Note-taking philosophy</li>
+  <li><a href="/guides/getting-started/" class="wikilink" data-wikilink-target="guides/getting-started">Getting Started</a> — User guide</li>
+  <li><a href="/guides/markdown-features/" class="wikilink" data-wikilink-target="guides/markdown-features">Markdown Features</a> — Formatting reference</li>
+</ul>
+
+<h2 id="timeline">Timeline</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Milestone</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2026-03-23</td>
+      <td>Project started</td>
+    </tr>
+    <tr>
+      <td>2026-03-23</td>
+      <td>Core layout complete</td>
+    </tr>
+    <tr>
+      <td>2026-03-23</td>
+      <td>Wikilinks + backlinks working</td>
+    </tr>
+    <tr>
+      <td>TBD</td>
+      <td>First release</td>
+    </tr>
+  </tbody>
+</table>

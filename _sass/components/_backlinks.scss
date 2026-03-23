@@ -1,0 +1,24 @@
+// Backlinks (inline in content, not sidebar)
+
+.backlinks-section {
+  margin-top: var(--sp-12);
+  padding-top: var(--sp-6);
+  border-top: 1px solid var(--border);
+}
+
+.backlinks-section-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: var(--sp-3);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.backlinks-section-title svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  color: var(--text-faint);
+}

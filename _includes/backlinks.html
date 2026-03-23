@@ -1,0 +1,26 @@
+{% assign backlinks = site.data.backlinks[page.url] %} {% if backlinks and
+backlinks.size > 0 %}
+<div class="sidebar-section">
+  <div class="sidebar-section-title">Backlinks ({{ backlinks.size }})</div>
+  <div class="backlinks-list">
+    {% for bl in backlinks %} {% assign bl_page = site.notes | where: "url",
+    bl["source"] | first %} {% if bl_page %}
+    <div class="backlink-item">
+      <a href="{{ bl_page.url | relative_url }}" class="backlink-link">
+        <div class="backlink-title">{{ bl_page.title }}</div>
+        {% if bl["context"] and bl["context"] != "" %}
+        <div class="backlink-context">
+          {{ bl["context"] | strip_html | truncatewords: 15 }}
+        </div>
+        {% endif %}
+      </a>
+    </div>
+    {% endif %} {% endfor %}
+  </div>
+</div>
+{% else %}
+<div class="sidebar-section">
+  <div class="sidebar-section-title">Backlinks</div>
+  <div class="backlinks-empty">No linked mentions</div>
+</div>
+{% endif %}
