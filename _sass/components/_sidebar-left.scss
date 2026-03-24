@@ -29,8 +29,13 @@
 }
 
 .sidebar-left-actions {
-  display: flex;
+  display: none;
   gap: var(--sp-1);
+
+  // Only show on mobile (desktop uses header X button)
+  @media (max-width: 1024px) {
+    display: flex;
+  }
 }
 
 .sidebar-left-btn {

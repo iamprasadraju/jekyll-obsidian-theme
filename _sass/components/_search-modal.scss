@@ -1,4 +1,4 @@
-// Search Modal (Command Palette)
+// Search Modal (Command Palette) - Obsidian Style
 
 .search-modal {
   display: none;
@@ -7,8 +7,8 @@
   z-index: 100;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 15vh;
-  background: var(--bg-overlay);
+  padding-top: 20vh;
+  background: var(--background-modifier-cover);
 
   &.is-open {
     display: flex;
@@ -18,18 +18,18 @@
 .search-modal-content {
   width: 100%;
   max-width: 560px;
-  background: var(--bg-primary);
+  background: var(--background-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
   overflow: hidden;
-  animation: searchModalIn 150ms ease;
+  animation: searchModalIn 120ms ease;
 }
 
 @keyframes searchModalIn {
   from {
     opacity: 0;
-    transform: scale(0.96) translateY(-8px);
+    transform: scale(0.97) translateY(-4px);
   }
   to {
     opacity: 1;
@@ -72,7 +72,7 @@
   font-size: var(--font-size-xs);
   color: var(--text-faint);
   padding: 2px 6px;
-  background: var(--bg-tertiary);
+  background: var(--background-tertiary);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -86,7 +86,7 @@
 .search-results {
   max-height: 400px;
   overflow-y: auto;
-  padding: var(--sp-2);
+  padding: var(--sp-1);
 }
 
 .search-results-empty {
@@ -113,7 +113,7 @@
   }
 
   &.is-selected {
-    outline: 2px solid var(--accent);
+    background: var(--interactive-normal);
   }
 }
 

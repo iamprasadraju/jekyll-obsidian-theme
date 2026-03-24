@@ -42,6 +42,17 @@
     var isOpen = sidebar.classList.toggle("is-open")
     if (overlay) overlay.classList.toggle("is-open", isOpen)
     localStorage.setItem("obsidian-sidebar-" + side, isOpen ? "open" : "closed")
+
+    // On desktop, toggle collapsed class on app-layout
+    var appLayout = document.querySelector(".app-layout")
+    if (appLayout) {
+      if (side === "left" && window.innerWidth > 1024) {
+        appLayout.classList.toggle("sidebar-collapsed", !isOpen)
+      }
+      if (side === "right" && window.innerWidth > 1024) {
+        appLayout.classList.toggle("sidebar-right-collapsed", !isOpen)
+      }
+    }
   }
 
   // ═══════════════════════════════════════════════════════
@@ -54,9 +65,8 @@
   var lastFocusedElement = null
 
   function loadSearchIndex() {
-    var baseUrl = document.querySelector('link[rel="canonical"]')
-    baseUrl = baseUrl ? baseUrl.href.replace(/\/[^\/]*$/, "") : ""
-    fetch(baseUrl + "/search-index.json")
+    var baseUrl = getBaseUrl()
+    fetch(baseUrl + "search-index.json")
       .then(function (r) {
         return r.json()
       })
@@ -85,6 +95,7 @@
 
     lastFocusedElement = document.activeElement
     modal.classList.add("is-open")
+    document.body.style.overflow = "hidden"
     input.focus()
     if (input.value.trim()) {
       performSearch(input.value)
@@ -95,6 +106,7 @@
     var modal = document.getElementById("search-modal")
     if (!modal) return
     modal.classList.remove("is-open")
+    document.body.style.overflow = ""
     // Don't clear input/results — preserve state for reopen
     if (lastFocusedElement) {
       lastFocusedElement.focus()
@@ -183,17 +195,18 @@
     var end = Math.min(text.length, bestPos + 80)
     var snippet = text.substring(start, end)
 
-    // Highlight matching words
+    // Escape HTML first, then apply highlighting safely
+    var escaped = escapeHtml(snippet)
+
+    // Highlight matching words within escaped HTML
     for (var w = 0; w < words.length; w++) {
-      var re = new RegExp("(" + escapeRegex(words[w]) + ")", "gi")
-      snippet = snippet.replace(re, "<mark>$1</mark>")
+      var re = new RegExp("(" + escapeRegex(escapeHtml(words[w])) + ")", "gi")
+      escaped = escaped.replace(re, '<mark>$1</mark>')
     }
 
     return (
       (start > 0 ? "..." : "") +
-      escapeHtml(snippet)
-        .replace(/&lt;mark&gt;/g, "<mark>")
-        .replace(/&lt;\/mark&gt;/g, "</mark>") +
+      escaped +
       (end < text.length ? "..." : "")
     )
   }
@@ -249,147 +262,484 @@
   }
 
   // ═══════════════════════════════════════════════════════
-  // Graph View (Lazy Load + Re-init Support)
+  // Graph View (force-graph - Barnes-Hut O(n log n))
   // ═══════════════════════════════════════════════════════
-  var graphNetwork = null
-  var visLoaded = false
-  var visLoadCallback = null
+  var graphInstance = null
+  var graphLibLoaded = false
+  var graphLoadCallback = null
+  var graphDataCache = null
+  var graphHoveredNode = null
+  var graphAdjacency = {}
 
-  function loadVisJs(callback) {
-    if (visLoaded) {
+  // Obsidian-style colors: silver nodes, dark lines
+  var NODE_COLOR_DARK = "#a9a9b2"
+  var NODE_COLOR_LIGHT = "#52525b"
+  var NODE_HOVER_COLOR = "#a78bfa"
+  var NODE_HOVER_COLOR_LIGHT = "#7c3aed"
+  var FOCUSED_COLOR = "#c8c8d0"
+  var FOCUSED_COLOR_LIGHT = "#3f3f46"
+  var HOVER_TRANSITION_SPEED = 0.15
+  var DIM_OPACITY = 0.12
+  var EDGE_DEFAULT_DARK = "rgba(43, 43, 43, 0.8)"
+  var EDGE_DEFAULT_LIGHT = "rgba(156, 163, 175, 0.35)"
+  var EDGE_HIGHLIGHT_DARK = "rgba(167, 139, 250, 0.7)"
+  var EDGE_HIGHLIGHT_LIGHT = "rgba(124, 58, 237, 0.5)"
+  var LABEL_COLOR_DARK = "#d1d5db"
+  var LABEL_COLOR_LIGHT = "#374151"
+
+  function getBaseUrl() {
+    var el = document.querySelector('link[href*="main.css"]')
+    return el ? el.href.replace(/assets\/css\/.*/, "") : "/"
+  }
+
+  function loadGraphLib(callback) {
+    if (graphLibLoaded) {
       callback()
       return
     }
-    // Queue callback if already loading
-    if (visLoadCallback) {
-      var orig = visLoadCallback
-      visLoadCallback = function () {
+    if (graphLoadCallback) {
+      var orig = graphLoadCallback
+      graphLoadCallback = function () {
         orig()
         callback()
       }
       return
     }
-    visLoadCallback = callback
+    graphLoadCallback = callback
 
-    var base = document.querySelector('link[href*="main.css"]')
-    base = base ? base.href.replace(/assets\/css\/.*/, "") : "/"
     var script = document.createElement("script")
-    script.src = base + "assets/js/vendor/vis-network.min.js"
+    script.src = getBaseUrl() + "assets/js/vendor/force-graph.min.js"
     script.onload = function () {
-      visLoaded = true
-      if (visLoadCallback) {
-        visLoadCallback()
-        visLoadCallback = null
+      graphLibLoaded = true
+      if (graphLoadCallback) {
+        graphLoadCallback()
+        graphLoadCallback = null
       }
     }
     script.onerror = function () {
-      console.warn("Failed to load vis-network")
-      visLoadCallback = null
+      console.warn("Failed to load force-graph")
+      graphLoadCallback = null
     }
     document.head.appendChild(script)
   }
 
-  function initGraphView() {
-    // Destroy existing network if any
-    if (graphNetwork) {
-      graphNetwork.destroy()
-      graphNetwork = null
+  function loadGraphData(callback) {
+    if (graphDataCache) {
+      callback(graphDataCache)
+      return
     }
+    fetch(getBaseUrl() + "graph-data.json")
+      .then(function (r) { return r.json() })
+      .then(function (data) {
+        graphDataCache = data
+        callback(data)
+      })
+      .catch(function (err) {
+        console.warn("Could not load graph data:", err)
+      })
+  }
 
-    // Clear previous canvas content
-    var canvasContainer = document.getElementById("graph-canvas")
-    if (canvasContainer) canvasContainer.innerHTML = ""
+  function buildAdjacency(nodes, edges) {
+    var adj = {}
+    nodes.forEach(function (n) { adj[n.id] = { neighbors: new Set(), edges: new Set() } })
+    edges.forEach(function (e, i) {
+      if (adj[e.from]) { adj[e.from].neighbors.add(e.to); adj[e.from].edges.add(i) }
+      if (adj[e.to]) { adj[e.to].neighbors.add(e.from); adj[e.to].edges.add(i) }
+    })
+    return adj
+  }
 
-    loadVisJs(function () {
-      if (typeof vis === "undefined") {
-        console.warn("Vis.js not loaded")
+  function initGraphView() {
+    if (graphInstance) {
+      graphInstance._cleanupGraphKeys && graphInstance._cleanupGraphKeys()
+      graphInstance._destructor && graphInstance._destructor()
+      graphInstance = null
+    }
+    graphHoveredNode = null
+
+    var container = document.getElementById("graph-canvas")
+    if (!container) return
+    container.innerHTML = ""
+
+    loadGraphLib(function () {
+      if (typeof ForceGraph === "undefined") {
+        console.warn("ForceGraph not loaded")
         return
       }
 
-      var container = document.getElementById("graph-canvas")
-      if (!container) return
+      loadGraphData(function (data) {
+        var isDark = document.documentElement.getAttribute("data-theme") !== "light"
+        var currentPath = window.location.pathname
 
-      var base = document.querySelector('link[href*="main.css"]')
-      base = base ? base.href.replace(/assets\/css\/.*/, "") : "/"
+        // Load cached positions
+        var cached = {}
+        try { cached = JSON.parse(localStorage.getItem("graph-pos") || "{}") } catch (e) { /* ignore */ }
 
-      fetch(base + "graph-data.json")
-        .then(function (r) {
-          return r.json()
+        // Calculate backlink counts for node sizing
+        var backlinkCounts = {}
+        data.edges.forEach(function (e) {
+          backlinkCounts[e.to] = (backlinkCounts[e.to] || 0) + 1
+          backlinkCounts[e.from] = (backlinkCounts[e.from] || 0) + 1
         })
-        .then(function (data) {
-          var isDark =
-            document.documentElement.getAttribute("data-theme") !== "light"
 
-          var nodes = new vis.DataSet(
-            data.nodes.map(function (n) {
-              var isCurrent = n.url === window.location.pathname
-              return {
-                id: n.id,
-                label: n.label,
-                url: n.url,
-                group: n.group,
-                color: isCurrent
-                  ? isDark
-                    ? "#7c3aed"
-                    : "#6d28d9"
-                  : isDark
-                    ? "#60a5fa"
-                    : "#0969da",
-                font: { color: isDark ? "#dcddde" : "#1f2328", size: 14 },
-                shape: "dot",
-                size: isCurrent ? 20 : 12,
+        var defaultColor = isDark ? NODE_COLOR_DARK : NODE_COLOR_LIGHT
+        var focusedColor = isDark ? FOCUSED_COLOR : FOCUSED_COLOR_LIGHT
+        var hoverColor = isDark ? NODE_HOVER_COLOR : NODE_HOVER_COLOR_LIGHT
+
+        // Prepare nodes
+        var nodes = data.nodes.map(function (n) {
+          var cp = cached[n.url]
+          var isFocused = n.url === currentPath
+          var links = backlinkCounts[n.id] || 0
+          return {
+            id: n.id,
+            name: n.label,
+            url: n.url,
+            group: n.group,
+            color: isFocused ? focusedColor : defaultColor,
+            val: isFocused ? 8 : Math.max(4, 2 + Math.sqrt(links) * 1.5),
+            isFocused: isFocused,
+            x: cp ? cp[0] : undefined,
+            y: cp ? cp[1] : undefined,
+            hoverOpacity: 1,
+            targetOpacity: 1,
+          }
+        })
+
+        // Prepare links with edge indices
+        var links = data.edges.map(function (e, i) {
+          return { source: e.from, target: e.to, index: i }
+        })
+
+        // Build adjacency map for hover highlighting
+        graphAdjacency = buildAdjacency(data.nodes, data.edges)
+
+        var fg = ForceGraph()(container)
+          .graphData({ nodes: nodes, links: links })
+          .backgroundColor("transparent")
+          .autoPauseRedraw(false)
+          .linkColor(function (link) {
+            if (graphHoveredNode !== null) {
+              var adj = graphAdjacency[graphHoveredNode]
+              if (adj && adj.edges.has(link.index)) {
+                return isDark ? EDGE_HIGHLIGHT_DARK : EDGE_HIGHLIGHT_LIGHT
               }
-            })
-          )
-
-          var edges = new vis.DataSet(
-            data.edges.map(function (e) {
-              return {
-                id: e.id,
-                from: e.from,
-                to: e.to,
-                color: { color: isDark ? "#3f3f46" : "#d0d7de", opacity: 0.6 },
-                width: 1,
-              }
-            })
-          )
-
-          graphNetwork = new vis.Network(
-            container,
-            { nodes: nodes, edges: edges },
-            {
-              physics: {
-                enabled: true,
-                barnesHut: {
-                  gravitationalConstant: -3000,
-                  centralGravity: 0.3,
-                  springLength: 150,
-                  springConstant: 0.04,
-                },
-              },
-              interaction: {
-                hover: true,
-                tooltipDelay: 200,
-                zoomView: true,
-                dragView: true,
-              },
-              nodes: { borderWidth: 0, shadow: false },
-              edges: { smooth: { type: "continuous" } },
+              return isDark ? "rgba(107,114,128,0.06)" : "rgba(156,163,175,0.08)"
             }
-          )
+            return isDark ? EDGE_DEFAULT_DARK : EDGE_DEFAULT_LIGHT
+          })
+          .linkWidth(function (link) {
+            if (graphHoveredNode !== null) {
+              var adj = graphAdjacency[graphHoveredNode]
+              if (adj && adj.edges.has(link.index)) return 1.2
+              return 0.3
+            }
+            return 0.5
+          })
+          .nodeColor(function (n) { return n.color })
+          .nodeVal(function (n) {
+            if (graphHoveredNode !== null) {
+              if (n.id === graphHoveredNode) return n.val * 1.8
+              var adj = graphAdjacency[graphHoveredNode]
+              if (adj && adj.neighbors.has(n.id)) return n.val * 1.3
+              return n.val * 0.5
+            }
+            return n.val
+          })
+          .nodeCanvasObject(function (n, ctx, globalScale) {
+            var color = defaultColor
+            var opacity = n.hoverOpacity
 
-          graphNetwork.on("click", function (params) {
-            if (params.nodes.length > 0) {
-              var node = nodes.get(params.nodes[0])
-              if (node && node.url) window.location.href = node.url
+            // Smooth opacity transition on hover
+            if (graphHoveredNode !== null) {
+              if (n.id === graphHoveredNode) {
+                color = hoverColor
+                n.targetOpacity = 1
+              } else if (graphAdjacency[graphHoveredNode] && graphAdjacency[graphHoveredNode].neighbors.has(n.id)) {
+                color = hoverColor
+                n.targetOpacity = 1
+              } else {
+                n.targetOpacity = DIM_OPACITY
+              }
+            } else {
+              n.targetOpacity = 1
+            }
+
+            // Interpolate opacity for smooth transition
+            n.hoverOpacity += (n.targetOpacity - n.hoverOpacity) * HOVER_TRANSITION_SPEED
+            if (Math.abs(n.hoverOpacity - n.targetOpacity) < 0.01) {
+              n.hoverOpacity = n.targetOpacity
+            }
+            opacity = n.hoverOpacity
+
+            if (n.isFocused && graphHoveredNode === null) {
+              color = focusedColor
+            }
+
+            var r = Math.sqrt(n.val) * 3
+            ctx.globalAlpha = opacity
+            ctx.beginPath()
+            ctx.arc(n.x, n.y, r, 0, 2 * Math.PI, false)
+            ctx.fillStyle = color
+            ctx.fill()
+
+            // Always show labels when not hovering, show on hover for node + neighbors
+            var showLabel = true
+            if (graphHoveredNode !== null) {
+              showLabel = n.id === graphHoveredNode || (graphAdjacency[graphHoveredNode] && graphAdjacency[graphHoveredNode].neighbors.has(n.id))
+            }
+
+            if (showLabel && n.name) {
+              var fontSize = 10 / globalScale
+              ctx.font = fontSize + "px -apple-system, BlinkMacSystemFont, sans-serif"
+              ctx.fillStyle = isDark ? LABEL_COLOR_DARK : LABEL_COLOR_LIGHT
+              ctx.globalAlpha = opacity
+              ctx.textAlign = "center"
+              ctx.textBaseline = "top"
+              ctx.fillText(n.name, n.x, n.y + r + 2)
+            }
+
+            ctx.globalAlpha = 1
+          })
+          .onNodeHover(function (node) {
+            graphHoveredNode = node ? node.id : null
+            container.style.cursor = node ? "pointer" : "default"
+          })
+          .d3AlphaDecay(0.005)
+          .d3VelocityDecay(0.15)
+          .warmupTicks(30)
+          .cooldownTicks(60)
+          .cooldownTime(3000)
+          .minZoom(0.08)
+          .maxZoom(10)
+          .onNodeClick(function (n) {
+            if (n.url && n.url.indexOf("#") !== 0) window.location.href = n.url
+          })
+
+        // D3-Force: center, charge repulsion, link spring
+        fg.d3Force('center').strength(0.05)
+        fg.d3Force('charge').strength(-150).distanceMax(350)
+        fg.d3Force('link').distance(120).strength(0.3)
+
+        // Smooth opening: zoomToFit during simulation
+        var hasFitted = false
+        fg.onEngineTick(function () {
+          if (!hasFitted) {
+            hasFitted = true
+            fg.zoomToFit(1200, 80)
+          }
+        })
+
+        fg.onEngineStop(function () {
+          fg.zoomToFit(600, 60)
+          // Cache positions
+          setTimeout(function () {
+            var positions = {}
+            fg.graphData().nodes.forEach(function (n) {
+              if (n.x !== undefined && n.y !== undefined) {
+                positions[n.url] = [n.x, n.y]
+              }
+            })
+            localStorage.setItem("graph-pos", JSON.stringify(positions))
+          }, 800)
+        })
+
+        // Arrow key panning
+        function handleGraphKeys(e) {
+          var graphEl = document.getElementById("graph-view")
+          if (!graphEl || !graphEl.classList.contains("is-open")) return
+
+          var step = e.shiftKey ? 100 : 40
+          var center = fg.center()
+          var scale = fg.zoom()
+          var handled = false
+
+          switch (e.key) {
+            case "ArrowLeft":
+              fg.centerAt(center.x - step / scale, undefined, 200)
+              handled = true
+              break
+            case "ArrowRight":
+              fg.centerAt(center.x + step / scale, undefined, 200)
+              handled = true
+              break
+            case "ArrowUp":
+              fg.centerAt(undefined, center.y - step / scale, 200)
+              handled = true
+              break
+            case "ArrowDown":
+              fg.centerAt(undefined, center.y + step / scale, 200)
+              handled = true
+              break
+            case "+":
+            case "=":
+              fg.zoom(scale * 1.3, 300)
+              handled = true
+              break
+            case "-":
+            case "_":
+              fg.zoom(scale * 0.7, 300)
+              handled = true
+              break
+            case "0":
+              fg.zoomToFit(600, 60)
+              handled = true
+              break
+          }
+
+          if (handled) e.preventDefault()
+        }
+
+        document.addEventListener("keydown", handleGraphKeys)
+
+        fg._cleanupGraphKeys = function () {
+          document.removeEventListener("keydown", handleGraphKeys)
+        }
+
+        graphInstance = fg
+      })
+    })
+  }
+
+  // ─── Sidebar Mini Graph ─────────────────────────────────
+  var miniGraphInstance = null
+
+  function initMiniGraph() {
+    var container = document.getElementById("graph-mini-canvas")
+    if (!container) return
+
+    loadGraphLib(function () {
+      if (typeof ForceGraph === "undefined") return
+
+      loadGraphData(function (data) {
+        var isDark = document.documentElement.getAttribute("data-theme") !== "light"
+        var currentUrl = window.location.pathname
+
+        // Find current node
+        var currentNode = data.nodes.find(function (n) { return n.url === currentUrl })
+        if (!currentNode) return
+
+        // Get neighbors (1 hop) — only real nodes (exclude test nodes)
+        var neighborIds = new Set([currentNode.id])
+        data.edges.forEach(function (e) {
+          if (e.from === currentNode.id) neighborIds.add(e.to)
+          if (e.to === currentNode.id) neighborIds.add(e.from)
+        })
+
+        // Filter out test nodes from mini graph
+        var defaultColor = isDark ? NODE_COLOR_DARK : NODE_COLOR_LIGHT
+        var focusedColor = isDark ? FOCUSED_COLOR : FOCUSED_COLOR_LIGHT
+        var hoverColor = isDark ? NODE_HOVER_COLOR : NODE_HOVER_COLOR_LIGHT
+
+        var miniAdjacency = buildAdjacency(
+          data.nodes.filter(function (n) { return neighborIds.has(n.id) }),
+          data.edges.filter(function (e) { return neighborIds.has(e.from) && neighborIds.has(e.to) })
+        )
+
+        var nodes = data.nodes
+          .filter(function (n) { return neighborIds.has(n.id) && n.url.indexOf("#") !== 0 })
+          .map(function (n) {
+            return {
+              id: n.id,
+              name: n.label,
+              url: n.url,
+              color: n.id === currentNode.id ? focusedColor : defaultColor,
+              val: n.id === currentNode.id ? 9 : 4,
+              isFocused: n.id === currentNode.id,
             }
           })
-        })
-        .catch(function (err) {
-          console.warn("Could not load graph data:", err)
-          container.innerHTML =
-            '<p style="padding:2rem;text-align:center;color:var(--text-muted);">Graph data not available. Run Jekyll build first.</p>'
-        })
+
+        var edgeIndex = 0
+        var links = data.edges
+          .filter(function (e) { return neighborIds.has(e.from) && neighborIds.has(e.to) })
+          .map(function (e) { return { source: e.from, target: e.to, index: edgeIndex++ } })
+
+        var miniHoveredNode = null
+
+        miniGraphInstance = ForceGraph()(container)
+          .graphData({ nodes: nodes, links: links })
+          .backgroundColor("transparent")
+          .autoPauseRedraw(false)
+          .linkColor(function (link) {
+            if (miniHoveredNode !== null) {
+              var adj = miniAdjacency[miniHoveredNode]
+              if (adj && adj.edges.has(link.index)) {
+                return isDark ? EDGE_HIGHLIGHT_DARK : EDGE_HIGHLIGHT_LIGHT
+              }
+              return isDark ? "rgba(107,114,128,0.06)" : "rgba(156,163,175,0.08)"
+            }
+            return isDark ? EDGE_DEFAULT_DARK : EDGE_DEFAULT_LIGHT
+          })
+          .linkWidth(function (link) {
+            if (miniHoveredNode !== null) {
+              var adj = miniAdjacency[miniHoveredNode]
+              if (adj && adj.edges.has(link.index)) return 1.5
+              return 0.3
+            }
+            return 0.4
+          })
+          .nodeColor(function (n) { return n.color })
+          .nodeVal(function (n) {
+            if (miniHoveredNode !== null) {
+              if (n.id === miniHoveredNode) return n.val * 1.5
+              var adj = miniAdjacency[miniHoveredNode]
+              if (adj && adj.neighbors.has(n.id)) return n.val * 1.2
+              return n.val * 0.5
+            }
+            return n.val
+          })
+          .nodeCanvasObject(function (n, ctx, globalScale) {
+            var color = defaultColor
+            var opacity = 1
+
+            if (miniHoveredNode !== null) {
+              if (n.id === miniHoveredNode || (miniAdjacency[miniHoveredNode] && miniAdjacency[miniHoveredNode].neighbors.has(n.id))) {
+                color = hoverColor
+                opacity = 1
+              } else {
+                opacity = 0.12
+              }
+            } else if (n.isFocused) {
+              color = focusedColor
+            }
+
+            var r = Math.sqrt(n.val) * 2
+            ctx.globalAlpha = opacity
+            ctx.beginPath()
+            ctx.arc(n.x, n.y, r, 0, 2 * Math.PI, false)
+            ctx.fillStyle = color
+            ctx.fill()
+
+            // Show label on hover or for focused node
+            var showMiniLabel = n.isFocused
+            if (miniHoveredNode !== null) {
+              showMiniLabel = n.id === miniHoveredNode || (miniAdjacency[miniHoveredNode] && miniAdjacency[miniHoveredNode].neighbors.has(n.id))
+            }
+
+            if (showMiniLabel && n.name) {
+              var fontSize = 9 / globalScale
+              ctx.font = fontSize + "px -apple-system, sans-serif"
+              ctx.fillStyle = isDark ? LABEL_COLOR_DARK : LABEL_COLOR_LIGHT
+              ctx.globalAlpha = opacity
+              ctx.textAlign = "center"
+              ctx.textBaseline = "top"
+              ctx.fillText(n.name, n.x, n.y + r + 2)
+            }
+
+            ctx.globalAlpha = 1
+          })
+          .onNodeHover(function (node) {
+            miniHoveredNode = node ? node.id : null
+            container.style.cursor = node ? "pointer" : "default"
+          })
+          .d3AlphaDecay(0.04)
+          .warmupTicks(60)
+          .cooldownTicks(40)
+          .cooldownTime(2000)
+          .onNodeClick(function (n) {
+            if (n.url && n.url.indexOf("#") !== 0) window.location.href = n.url
+          })
+      })
     })
   }
 
@@ -400,7 +750,7 @@
     var tocLinks = document.querySelectorAll(".toc-link")
     if (tocLinks.length === 0) return
 
-    var contentWrapper = document.querySelector(".content-wrapper")
+    var contentWrapper = document.querySelector(".pane-content-scroll")
     if (!contentWrapper) return
 
     var headings = []
@@ -592,6 +942,294 @@
   }
 
   // ═══════════════════════════════════════════════════════
+  // Inline Sliding Panes (Andy Matuschak style)
+  // ═══════════════════════════════════════════════════════
+  var panesContainer = null
+  var paneStack = []             // array of { el, url, width }
+  var defaultPaneWidth = 625
+  var MIN_PANE_WIDTH = 250
+
+  // Restore saved width
+  var _savedPW = localStorage.getItem("pane-width")
+  if (_savedPW) defaultPaneWidth = parseInt(_savedPW, 10) || 625
+
+  // ─── Scroll to show a pane ────────────────────────────
+  function focusPane(entry, animated) {
+    if (!panesContainer || !entry) return
+    var paneLeft = entry.el.offsetLeft
+    var paneW = entry.el.offsetWidth
+    var containerW = panesContainer.clientWidth
+    var scrollLeft = panesContainer.scrollLeft
+    var behavior = animated ? "smooth" : "auto"
+
+    if (scrollLeft > paneLeft) {
+      panesContainer.scrollTo({ left: paneLeft, top: 0, behavior: behavior })
+    } else if (scrollLeft + containerW < paneLeft + paneW) {
+      panesContainer.scrollTo({
+        left: paneLeft + paneW - containerW,
+        top: 0,
+        behavior: behavior
+      })
+    }
+  }
+
+  // ─── Mark active pane ─────────────────────────────────
+  function setActivePane(entry) {
+    paneStack.forEach(function (e) {
+      e.el.classList.toggle("is-active", e === entry)
+    })
+  }
+
+  // ─── Open a new pane ──────────────────────────────────
+  function openPane(url, title, afterIndex) {
+    if (!panesContainer) {
+      panesContainer = document.getElementById("panes-container")
+      if (!panesContainer) return
+    }
+
+    // Breadcrumb behavior: if opening from pane at index N,
+    // close all panes after N first.
+    if (typeof afterIndex === "number" && afterIndex >= 0) {
+      while (paneStack.length > afterIndex + 1) {
+        var removed = paneStack.pop()
+        removed.el.remove()
+      }
+    }
+
+    // Add .has-panes to activate fixed-width root pane
+    panesContainer.classList.add("has-panes")
+    document.documentElement.style.setProperty("--pane-width", defaultPaneWidth + "px")
+
+    var safeTitle = escapeHtml(title || url)
+    var paneW = defaultPaneWidth
+
+    // Build pane element
+    var paneEl = document.createElement("div")
+    paneEl.className = "pane slide-pane"
+    paneEl.style.width = paneW + "px"
+    paneEl.setAttribute("data-pane-url", url)
+
+    paneEl.innerHTML =
+      '<div class="pane-spine">' +
+        '<div class="pane-spine-title">' + safeTitle + '</div>' +
+        '<button class="pane-spine-close" data-action="close-pane" aria-label="Close">' +
+          '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>' +
+        '</button>' +
+      '</div>' +
+      '<div class="pane-body">' +
+        '<div class="pane-resize-handle"></div>' +
+        '<div class="pane-content-scroll">' +
+          '<div class="pane-loading"></div>' +
+        '</div>' +
+      '</div>'
+
+    panesContainer.appendChild(paneEl)
+
+    var entry = { el: paneEl, url: url, width: paneW }
+    paneStack.push(entry)
+
+    setActivePane(entry)
+
+    // Init resize
+    var handle = paneEl.querySelector(".pane-resize-handle")
+    initPaneResize(handle, entry)
+
+    // Click on spine scrolls to pane
+    var spine = paneEl.querySelector(".pane-spine")
+    spine.addEventListener("click", function (e) {
+      if (e.target.closest(".pane-spine-close")) return
+      setActivePane(entry)
+      focusPane(entry, true)
+    })
+
+    // Scroll to new pane
+    requestAnimationFrame(function () {
+      focusPane(entry, true)
+    })
+
+    // Fetch page content
+    fetch(url)
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status)
+        return r.text()
+      })
+      .then(function (html) {
+        var parser = new DOMParser()
+        var doc = parser.parseFromString(html, "text/html")
+        var noteContent = doc.querySelector(".note-content")
+        var scrollArea = paneEl.querySelector(".pane-content-scroll")
+
+        if (noteContent) {
+          rewriteLinks(noteContent, paneStack.indexOf(entry))
+          scrollArea.innerHTML = noteContent.innerHTML
+          reinitPane(paneEl)
+        } else {
+          scrollArea.innerHTML = '<p style="color:var(--text-muted);">Could not load content.</p>'
+        }
+      })
+      .catch(function (err) {
+        console.warn("Pane fetch failed:", err)
+        var scrollArea = paneEl.querySelector(".pane-content-scroll")
+        scrollArea.innerHTML = '<p style="color:var(--text-muted);">Failed to load: ' + escapeHtml(err.message) + '</p>'
+      })
+
+    return entry
+  }
+
+  // ─── Close a specific pane ────────────────────────────
+  function closePane(entry) {
+    var idx = paneStack.indexOf(entry)
+    if (idx === -1) return
+
+    // Also close all panes after this one (breadcrumb trail)
+    while (paneStack.length > idx) {
+      var removed = paneStack.pop()
+      removed.el.classList.add("is-closing")
+
+      ;(function (el) {
+        var done = false
+        function onDone() {
+          if (done) return
+          done = true
+          el.remove()
+        }
+        el.addEventListener("animationend", onDone, { once: true })
+        setTimeout(onDone, 200)
+      })(removed.el)
+    }
+
+    // If no more slide panes, remove .has-panes
+    if (paneStack.length === 0 && panesContainer) {
+      panesContainer.classList.remove("has-panes")
+    }
+
+    // Focus last remaining pane
+    if (paneStack.length > 0) {
+      var last = paneStack[paneStack.length - 1]
+      setActivePane(last)
+      focusPane(last, true)
+    }
+  }
+
+  function closeTopPane() {
+    if (paneStack.length === 0) return false
+    closePane(paneStack[paneStack.length - 1])
+    return true
+  }
+
+  function closeAllPanes() {
+    while (paneStack.length > 0) {
+      var removed = paneStack.pop()
+      removed.el.remove()
+    }
+    if (panesContainer) {
+      panesContainer.classList.remove("has-panes")
+    }
+  }
+
+  // ─── Pane Resize ─────────────────────────────────────
+  function initPaneResize(handle, entry) {
+    if (!handle || !entry) return
+    var startX = 0
+    var startW = 0
+
+    function onMouseDown(e) {
+      e.preventDefault()
+      e.stopPropagation()
+      startX = e.clientX || (e.touches && e.touches[0].clientX) || 0
+      startW = entry.el.offsetWidth
+      handle.classList.add("is-active")
+      document.body.classList.add("is-grabbing")
+
+      document.addEventListener("mousemove", onMouseMove)
+      document.addEventListener("mouseup", onMouseUp)
+      document.addEventListener("touchmove", onMouseMove, { passive: false })
+      document.addEventListener("touchend", onMouseUp)
+    }
+
+    function onMouseMove(e) {
+      e.preventDefault()
+      var clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0
+      var dx = clientX - startX
+      var newW = Math.max(MIN_PANE_WIDTH, startW + dx)
+      entry.el.style.width = newW + "px"
+      entry.width = newW
+    }
+
+    function onMouseUp() {
+      handle.classList.remove("is-active")
+      document.body.classList.remove("is-grabbing")
+      document.removeEventListener("mousemove", onMouseMove)
+      document.removeEventListener("mouseup", onMouseUp)
+      document.removeEventListener("touchmove", onMouseMove)
+      document.removeEventListener("touchend", onMouseUp)
+
+      defaultPaneWidth = entry.width
+      localStorage.setItem("pane-width", entry.width)
+    }
+
+    handle.addEventListener("mousedown", onMouseDown)
+    handle.addEventListener("touchstart", onMouseDown, { passive: false })
+  }
+
+  // ─── Link Rewriting (inside fetched pane content) ────
+  function rewriteLinks(container, paneIndex) {
+    container.querySelectorAll("a[href]").forEach(function (a) {
+      var href = a.getAttribute("href")
+      if (!href) return
+
+      if (href.match(/^https?:\/\//)) return
+      if (href.startsWith("#")) return
+      if (href.startsWith("mailto:")) return
+      if (href.startsWith("/tags/")) return
+      if (a.classList.contains("tag")) return
+
+      a.setAttribute("data-pane-href", href)
+      a.setAttribute("data-pane-title", a.textContent || href)
+      a.setAttribute("data-pane-index", paneIndex)
+      a.classList.add("pane-link")
+    })
+  }
+
+  // ─── Re-init interactive elements inside a pane ──────
+  function reinitPane(paneEl) {
+    paneEl.querySelectorAll("pre, .highlight, div.highlighter-rouge").forEach(function (block) {
+      if (block.querySelector(".copy-btn")) return
+      var btn = document.createElement("button")
+      btn.className = "copy-btn"
+      btn.textContent = "Copy"
+      btn.setAttribute("aria-label", "Copy code")
+      btn.addEventListener("click", function () {
+        var code = block.querySelector("code")
+        if (!code) return
+        navigator.clipboard.writeText(code.textContent).then(function () {
+          btn.textContent = "Copied!"
+          btn.classList.add("copied")
+          setTimeout(function () {
+            btn.textContent = "Copy"
+            btn.classList.remove("copied")
+          }, 2000)
+        })
+      })
+      block.style.position = "relative"
+      block.appendChild(btn)
+    })
+
+    paneEl.querySelectorAll(
+      "h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]"
+    ).forEach(function (heading) {
+      if (!heading.querySelector(".heading-anchor")) {
+        var anchor = document.createElement("a")
+        anchor.className = "heading-anchor"
+        anchor.href = "#" + heading.id
+        anchor.textContent = "#"
+        anchor.setAttribute("aria-label", "Link to " + heading.textContent)
+        heading.prepend(anchor)
+      }
+    })
+  }
+
+  // ═══════════════════════════════════════════════════════
   // Keyboard Shortcuts
   // ═══════════════════════════════════════════════════════
   function handleKeyDown(e) {
@@ -614,9 +1252,15 @@
 
     // Escape → Close modals/sidebars
     if (e.key === "Escape") {
+      // Close top pane first
+      if (paneStack.length > 0) {
+        closeTopPane()
+        return
+      }
+
       var searchModal = document.getElementById("search-modal")
       if (searchModal && searchModal.classList.contains("is-open")) {
-        clearSearch()
+        closeSearch()
         return
       }
 
@@ -692,21 +1336,21 @@
         var graphEl = document.getElementById("graph-view")
         if (graphEl) {
           graphEl.classList.add("is-open")
-          // Defer init to next frame so container has computed dimensions
-          requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-              initGraphView()
-            })
-          })
+          // Wait for popup CSS animation to finish before initializing graph
+          // so force-graph reads correct container dimensions
+          setTimeout(function () {
+            initGraphView()
+          }, 350)
         }
         break
 
       case "close-graph":
         var graphEl2 = document.getElementById("graph-view")
         if (graphEl2) {
-          if (graphNetwork) {
-            graphNetwork.destroy()
-            graphNetwork = null
+          if (graphInstance) {
+            graphInstance._cleanupGraphKeys && graphInstance._cleanupGraphKeys()
+            graphInstance._destructor && graphInstance._destructor()
+            graphInstance = null
           }
           var canvasContainer = document.getElementById("graph-canvas")
           if (canvasContainer) canvasContainer.innerHTML = ""
@@ -726,6 +1370,71 @@
           saveFolderState()
         }
         break
+
+      case "close-pane":
+        e.stopPropagation()
+        var spineEl = target.closest(".pane-spine")
+        if (spineEl) {
+          var paneEl = spineEl.closest(".slide-pane")
+          var entry = null
+          for (var si = 0; si < paneStack.length; si++) {
+            if (paneStack[si].el === paneEl) {
+              entry = paneStack[si]
+              break
+            }
+          }
+          if (entry) closePane(entry)
+        }
+        break
+    }
+  }
+
+  // ─── Link Click Interception for Panes ────────────────────
+  function handleLinkClick(e) {
+    var link = e.target.closest("a")
+    if (!link) return
+
+    // Don't intercept if modifier key is held (open in new tab/window)
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+
+    var href = link.getAttribute("href")
+    if (!href) return
+
+    // Link inside an already-opened pane (breadcrumb trail)
+    if (link.classList.contains("pane-link")) {
+      var paneHref = link.getAttribute("data-pane-href")
+      if (paneHref) {
+        e.preventDefault()
+        var idx = parseInt(link.getAttribute("data-pane-index"), 10)
+        openPane(paneHref, link.getAttribute("data-pane-title") || link.textContent || paneHref, idx)
+        return
+      }
+    }
+
+    // Skip external links
+    if (href.match(/^https?:\/\//)) return
+
+    // Skip anchors
+    if (href.startsWith("#")) return
+
+    // Skip mailto
+    if (href.startsWith("mailto:")) return
+
+    // Skip tag links
+    if (link.classList.contains("tag")) return
+
+    // Skip links in sidebar
+    if (link.closest(".sidebar-left") || link.closest(".sidebar-right")) return
+
+    // Skip links that explicitly opt out
+    if (link.hasAttribute("data-no-pane")) return
+
+    // Intercept wikilinks and internal note links on the root page
+    if (link.classList.contains("wikilink") || link.classList.contains("backlink-link")) {
+      e.preventDefault()
+      // afterIndex = -1 means "from root page" — don't truncate any existing panes,
+      // but we want breadcrumb trail from root, so pass 0 to close everything after root
+      openPane(href, link.textContent || href, 0)
     }
   }
 
@@ -761,8 +1470,47 @@
     // Apply saved theme
     setTheme(getTheme())
 
+    // Restore sidebar state from localStorage
+    var leftState = localStorage.getItem("obsidian-sidebar-left")
+    var rightState = localStorage.getItem("obsidian-sidebar-right")
+    var leftSidebar = document.querySelector(".sidebar-left")
+    var rightSidebar = document.querySelector(".sidebar-right")
+    var appLayout = document.querySelector(".app-layout")
+    if (leftSidebar && appLayout) {
+      if (leftState === "closed") {
+        leftSidebar.classList.remove("is-open")
+        if (window.innerWidth > 1024) {
+          appLayout.classList.add("sidebar-collapsed")
+        }
+      }
+    }
+    if (rightSidebar && appLayout) {
+      if (rightState === "closed") {
+        rightSidebar.classList.remove("is-open")
+        if (window.innerWidth > 1024) {
+          appLayout.classList.add("sidebar-right-collapsed")
+        }
+      }
+    }
+
+    // Reset collapsed classes when crossing mobile breakpoint
+    var resizeTimer
+    window.addEventListener("resize", function () {
+      clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(function () {
+        if (window.innerWidth <= 1024 && appLayout) {
+          appLayout.classList.remove("sidebar-collapsed")
+          appLayout.classList.remove("sidebar-right-collapsed")
+        }
+      }, 150)
+    })
+
     // Event delegation for all data-action elements
     document.addEventListener("click", handleAction)
+
+    // Inline panes: link interception
+    document.addEventListener("click", handleLinkClick)
+    panesContainer = document.getElementById("panes-container")
 
     // Keyboard shortcuts
     document.addEventListener("keydown", handleKeyDown)
@@ -790,6 +1538,15 @@
 
     // File tree
     restoreFolderState()
+
+    // Sidebar mini graph
+    initMiniGraph()
+
+    // Detect Mac and update shortcut label
+    var shortcutLabel = document.getElementById("search-shortcut-label")
+    if (shortcutLabel && navigator.platform.indexOf("Mac") !== -1) {
+      shortcutLabel.textContent = "\u2318K"
+    }
   }
 
   // Run on DOM ready

@@ -8,8 +8,52 @@
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
   gap: var(--sp-2);
-  background: var(--bg-primary);
+  background: var(--background-primary);
   z-index: 5;
+}
+
+// Hide entire desktop header on mobile (mobile has its own header)
+.main-header {
+  @media (max-width: 1024px) {
+    display: none;
+  }
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+// Sidebar toggle button: show X when open, hamburger when closed
+.sidebar-toggle-btn {
+  .icon-hamburger,
+  .icon-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+  }
+
+  // Default: sidebar open → show X
+  .icon-hamburger { display: none; }
+  .icon-close { display: flex; }
+
+  // Sidebar collapsed → show hamburger
+  .app-layout.sidebar-collapsed & {
+    .icon-hamburger { display: flex; }
+    .icon-close { display: none; }
+  }
+
+  // Hide on mobile (mobile-header has its own hamburger)
+  @media (max-width: 1024px) {
+    display: none !important;
+  }
 }
 
 .header-breadcrumb {
@@ -60,6 +104,13 @@
   flex-shrink: 0;
 }
 
+// Hide desktop header's buttons on mobile (mobile header has its own)
+.main-header .header-actions {
+  @media (max-width: 1024px) {
+    display: none;
+  }
+}
+
 .header-btn {
   display: flex;
   align-items: center;
@@ -88,8 +139,8 @@
   align-items: center;
   gap: var(--sp-2);
   padding: var(--sp-1) var(--sp-3);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
+  background: var(--background-secondary);
+  border: var(--border-width) solid var(--border);
   border-radius: var(--radius);
   color: var(--text-faint);
   font-size: var(--font-size-sm);
@@ -125,6 +176,13 @@
   }
 }
 
+// Hide desktop header search on mobile (mobile header has its own)
+.main-header .breadcrumbs {
+  @media (max-width: 1024px) {
+    display: none;
+  }
+}
+
 // Mobile header (hidden on desktop)
 .mobile-header {
   display: none;
@@ -132,7 +190,7 @@
   height: var(--header-height);
   padding: 0 var(--sp-3);
   border-bottom: 1px solid var(--border);
-  background: var(--bg-primary);
+  background: var(--background-primary);
   gap: var(--sp-2);
 
   @media (max-width: 1024px) {
@@ -161,13 +219,7 @@
   }
 }
 
-// Right sidebar toggle in header
+// Right sidebar toggle in header — always visible on desktop
 .sidebar-right-toggle {
-  @media (max-width: 1280px) {
-    display: flex;
-  }
-
-  @media (min-width: 1281px) {
-    display: none;
-  }
+  display: flex;
 }

@@ -1,4 +1,4 @@
-// Base element styles
+// Base element styles - Minimal Publish
 
 // Headings with anchor links
 .note-content {
@@ -35,7 +35,7 @@
 .note-content {
   ul,
   ol {
-    padding-left: var(--sp-6);
+    padding-left: var(--list-padding);
     margin-bottom: var(--sp-4);
   }
 
@@ -48,13 +48,22 @@
   }
 
   li {
-    margin-bottom: var(--sp-1);
+    margin-bottom: var(--list-spacing);
 
     & > ul,
     & > ol {
       margin-bottom: 0;
-      margin-top: var(--sp-1);
+      margin-top: var(--list-spacing);
     }
+  }
+
+  // List markers
+  ul > li::marker {
+    color: var(--text-faint);
+  }
+
+  ol > li::marker {
+    color: var(--text-faint);
   }
 
   // Task lists
@@ -69,11 +78,14 @@
   }
 }
 
-// Images
+// Images - Minimal Publish style
 .note-content {
   img {
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
+    border-radius: var(--image-radius);
+  }
+
+  iframe {
+    border-radius: var(--image-radius);
   }
 }
 
@@ -81,7 +93,7 @@
 .note-content {
   hr {
     border: none;
-    border-top: 1px solid var(--border);
+    border-top: var(--border-width) solid var(--border);
     margin: var(--sp-8) 0;
   }
 }
@@ -89,15 +101,15 @@
 // Details/Summary (foldable)
 .note-content {
   details {
-    border: 1px solid var(--border);
+    border: var(--border-width) solid var(--border);
     border-radius: var(--radius);
     padding: var(--sp-3) var(--sp-4);
     margin-bottom: var(--sp-4);
-    background: var(--bg-secondary);
+    background: var(--background-secondary);
 
     summary {
       cursor: pointer;
-      font-weight: 600;
+      font-weight: var(--bold-weight);
       color: var(--text-normal);
       user-select: none;
 
@@ -121,8 +133,14 @@ kbd {
   font-family: var(--font-sans);
   font-size: var(--font-size-xs);
   color: var(--text-muted);
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
+  background: var(--background-tertiary);
+  border: var(--border-width) solid var(--border);
   border-radius: var(--radius-sm);
   box-shadow: 0 1px 0 var(--border);
+}
+
+// External links - plain by default (no icon)
+.plain-external-links .external-link {
+  background-image: none;
+  padding-right: 0;
 }

@@ -17,8 +17,16 @@
     </button>
   </div>
 
-  {% if page.toc != false %} {% include toc.html %} {% endif %} {% if
-  page.tags.size > 0 %}
+  {% if page.toc != false %} {% include toc.html %} {% endif %}
+
+  {% if site.obsidian.graph.enabled %}
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Local Graph</div>
+    <div class="graph-mini" id="graph-mini-canvas"></div>
+  </div>
+  {% endif %}
+
+  {% if page.tags.size > 0 %}
   <div class="sidebar-section">
     <div class="sidebar-section-title">Tags</div>
     <div class="note-tags">

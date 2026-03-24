@@ -1,34 +1,58 @@
-// Light Theme Overrides
-// Applied when html[data-theme="light"]
-
+// Light Theme Overrides - Original Obsidian
 [data-theme="light"] {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f5f5f5;
-  --bg-tertiary: #ebebeb;
-  --bg-elevated: #ffffff;
-  --bg-overlay: rgba(0, 0, 0, 0.3);
+  --bg1: #ffffff;
+  --bg2: #f5f5f5;
+  --bg3: #ebebeb;
+
+  --ui1: #d0d7de;
+  --ui2: #afb8c1;
+  --ui3: #8b949e;
+
+  --tx1: #1f2328;
+  --tx2: #57606a;
+  --tx3: #8b949e;
+  --tx4: #6639ba;
+
+  --ax1: #7c3aed;
+  --ax2: #6d28d9;
+  --ax3: #8b5cf6;
+
+  --hl1: rgba(124, 58, 237, 0.1);
+  --hl2: rgba(255, 225, 0, 0.5);
+
+  --sp1: white;
+
+  --mono100: black;
+  --mono0: white;
+
+  --interactive-normal: var(--bg1);
+  --interactive-accent-rgb: 220, 220, 220;
+
+  --active-line-bg: rgba(0, 0, 0, 0.035);
+  --background-modifier-cover: hsla(0, 0%, 0%, 0.5);
+
+  --background-modifier-error: rgba(255, 0, 0, 0.14);
+  --background-modifier-error-hover: rgba(255, 0, 0, 0.08);
+
+  --text-highlight-bg-active: rgba(0, 0, 0, 0.1);
+
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --btn-shadow-color: rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
+
   --bg-code: #f6f8fa;
 
-  --text-normal: #1f2328;
-  --text-muted: #57606a;
-  --text-faint: #8b949e;
-  --text-on-accent: #ffffff;
+  --tag-bg: rgba(124, 58, 237, 0.1);
+  --tag-text: #6d28d9;
+  --tag-hover-bg: rgba(124, 58, 237, 0.18);
 
-  --accent: #7c3aed;
-  --accent-hover: #6d28d9;
-  --accent-muted: rgba(124, 58, 237, 0.1);
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
 
-  --link: #0969da;
-  --link-hover: #0550ae;
-
-  --border: #d0d7de;
-  --border-hover: #afb8c1;
-  --border-active: #7c3aed;
-
-  --hover: #f3f4f6;
-  --active: #e5e7eb;
-
-  // Callout colors - light
   --callout-note: #0969da;
   --callout-note-bg: rgba(9, 105, 218, 0.05);
   --callout-tip: #1a7f37;
@@ -44,29 +68,66 @@
   --callout-quote: #57606a;
   --callout-quote-bg: rgba(87, 96, 106, 0.05);
 
-  // Code - light (GitHub-style)
-  --code-text: #1f2328;
-  --code-comment: #6e7781;
-  --code-keyword: #cf222e;
-  --code-string: #0a3069;
-  --code-number: #0550ae;
-  --code-function: #6639ba;
-  --code-variable: #953800;
-  --code-operator: #cf222e;
+  --accent: var(--ax1);
+  --accent-hover: var(--ax2);
+  --accent-muted: rgba(124, 58, 237, 0.1);
 
-  // Tags - light
-  --tag-bg: rgba(124, 58, 237, 0.1);
-  --tag-text: #6d28d9;
-  --tag-hover-bg: rgba(124, 58, 237, 0.18);
+  --link: #0969da;
+  --link-hover: #0550ae;
 
-  // Scrollbar - light
-  --scrollbar-track: transparent;
-  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
-  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+  --border: var(--ui1);
+  --border-hover: var(--ui2);
+  --border-active: var(--ax1);
 
-  // Shadows - light
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
+  --hover: var(--bg3);
+  --active: var(--bg3);
+
+  --text-selection: var(--hl1);
+
+  --cards-background: transparent;
+}
+
+// Light theme semantic aliases
+[data-theme="light"] {
+  --background-primary: var(--bg1);
+  --background-primary-alt: var(--bg2);
+  --background-secondary: var(--bg2);
+  --background-secondary-alt: var(--bg1);
+  --background-tertiary: var(--bg3);
+  --background-modifier-border: var(--ui1);
+  --background-modifier-border-hover: var(--ui2);
+  --background-modifier-border-focus: var(--ui3);
+  --background-modifier-hover: var(--bg3);
+  --background-modifier-active-hover: var(--bg3);
+  --background-modifier-accent: var(--ax3);
+  --background-modifier-form-field: var(--bg1);
+  --background-modifier-box-shadow: rgba(0, 0, 0, 0.08);
+
+  --interactive-hover: var(--ui1);
+  --interactive-accent: var(--ax3);
+  --interactive-accent-hover: var(--ax1);
+
+  --quote-opening-modifier: var(--ui2);
+
+  --text-normal: var(--tx1);
+  --text-bold: var(--tx1);
+  --text-italic: var(--tx1);
+  --text-muted: var(--tx2);
+  --text-faint: var(--tx3);
+  --text-accent: var(--ax1);
+  --text-accent-hover: var(--ax2);
+  --text-on-accent: white;
+  --text-blockquote: var(--tx2);
+  --text-code: var(--tx4);
+  --text-error: var(--color-red);
+
+  --icon-color: var(--tx2);
+  --icon-color-hover: var(--tx2);
+  --icon-color-active: var(--tx1);
+  --icon-hex: black;
+
+  --title-color: var(--tx1);
+  --title-color-inactive: var(--tx2);
+
+  --modal-border: var(--ui2);
 }

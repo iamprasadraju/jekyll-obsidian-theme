@@ -1,16 +1,17 @@
-// Wikilink Styling
+// Wikilink Styling - Minimal Publish
 
 .wikilink {
   color: var(--link);
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
+  text-decoration: underline;
+  text-decoration-color: hsla(201, 30%, 50%, 0.3);
+  text-underline-offset: 2px;
   transition: all var(--transition-fast);
   padding: 0 1px;
   border-radius: 2px;
 
   &:hover {
     color: var(--link-hover);
-    border-bottom-color: var(--link-hover);
+    text-decoration-color: var(--link-hover);
     background: var(--accent-muted);
   }
 }
@@ -27,20 +28,22 @@
   }
 }
 
-// Tag links
+// Tag links - Minimal Publish (outline pills)
 .tag {
   display: inline-block;
   padding: 1px var(--sp-2);
   background: var(--tag-bg);
   color: var(--tag-text);
   font-size: var(--font-size-sm);
-  border-radius: var(--radius-sm);
+  border: var(--border-width) solid var(--ui1);
+  border-radius: 3px;
   text-decoration: none;
-  transition: background var(--transition-fast);
+  transition: all var(--transition-fast);
   line-height: 1.6;
 
   &:hover {
     background: var(--tag-hover-bg);
-    color: var(--tag-text);
+    border-color: var(--ui2);
+    color: var(--text-normal);
   }
 }

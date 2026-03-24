@@ -10,8 +10,12 @@
     <div class="main-area">
       {% include header.html %}
 
-      <div class="content-wrapper">
-        <div class="note-content">{{ content }}</div>
+      <div class="panes-container" id="panes-container">
+        <div class="pane root-pane" data-pane-url="{{ page.url }}">
+          <div class="pane-content-scroll">
+            <div class="note-content">{{ content }}</div>
+          </div>
+        </div>
       </div>
     </div>
 

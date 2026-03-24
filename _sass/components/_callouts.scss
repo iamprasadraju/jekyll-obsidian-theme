@@ -1,9 +1,9 @@
-// Obsidian-style Callouts
+// Obsidian-style Callouts - Minimal Publish
 
 .callout {
   margin-bottom: var(--sp-4);
   border-radius: var(--radius);
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   overflow: hidden;
 }
 
@@ -12,7 +12,7 @@
   align-items: center;
   gap: var(--sp-2);
   padding: var(--sp-2) var(--sp-3);
-  font-weight: 600;
+  font-weight: var(--bold-weight);
   font-size: var(--font-size-sm);
   cursor: pointer;
   user-select: none;
@@ -72,7 +72,7 @@
   }
 }
 
-// Callout types
+// Callout types - Minimal Publish (left border only, subtle background)
 .callout[data-callout="note"] {
   border-left: 3px solid var(--callout-note);
 

@@ -1,4 +1,11 @@
-// Typography
+// Typography - Minimal Publish Style
+
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: -0.02em;
+}
 
 h1,
 h2,
@@ -7,55 +14,56 @@ h4,
 h5,
 h6 {
   color: var(--text-normal);
-  font-weight: 600;
   line-height: var(--line-height-tight);
   scroll-margin-top: calc(var(--header-height) + var(--sp-4));
 }
 
 h1 {
-  font-size: var(--font-size-3xl);
-  margin-bottom: var(--sp-4);
+  font-size: var(--h1);
+  font-weight: var(--h1-weight);
+  margin-bottom: var(--sp-3);
 }
 
 h2 {
-  font-size: var(--font-size-2xl);
-  margin-top: var(--sp-10);
-  margin-bottom: var(--sp-3);
-  padding-bottom: var(--sp-2);
-  border-bottom: 1px solid var(--border);
+  font-size: var(--h2);
+  font-weight: var(--h2-weight);
+  margin-top: var(--heading-spacing);
+  margin-bottom: var(--sp-2);
 }
 
 h3 {
-  font-size: var(--font-size-xl);
-  margin-top: var(--sp-8);
+  font-size: var(--h3);
+  font-weight: var(--h3-weight);
+  margin-top: var(--heading-spacing);
   margin-bottom: var(--sp-2);
 }
 
 h4 {
-  font-size: var(--font-size-lg);
-  margin-top: var(--sp-6);
+  font-size: var(--h4);
+  font-weight: var(--h4-weight);
+  margin-top: var(--heading-spacing);
   margin-bottom: var(--sp-2);
 }
 
 h5 {
-  font-size: var(--font-size-base);
-  font-weight: 700;
-  margin-top: var(--sp-6);
+  font-size: var(--h5);
+  font-weight: var(--h5-weight);
+  font-variant: var(--h5-variant);
+  margin-top: var(--heading-spacing);
   margin-bottom: var(--sp-2);
 }
 
 h6 {
-  font-size: var(--font-size-sm);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: var(--h6);
+  font-weight: var(--h6-weight);
+  font-variant: var(--h6-variant);
   color: var(--text-muted);
-  margin-top: var(--sp-6);
+  margin-top: var(--heading-spacing);
   margin-bottom: var(--sp-2);
 }
 
 p {
-  margin-bottom: var(--sp-4);
+  margin-bottom: var(--p-spacing);
 
   &:last-child {
     margin-bottom: 0;
@@ -63,7 +71,7 @@ p {
 }
 
 strong {
-  font-weight: 600;
+  font-weight: var(--bold-weight);
 }
 
 em {
@@ -74,23 +82,17 @@ small {
   font-size: var(--font-size-sm);
 }
 
-.text-muted {
-  color: var(--text-muted);
-}
-
-.text-faint {
-  color: var(--text-faint);
-}
-
+// Inline code
 code {
   font-family: var(--font-mono);
-  font-size: 0.875em;
+  font-size: 0.85em;
   padding: 0.15em 0.4em;
   background: var(--bg-code);
   border-radius: var(--radius-sm);
-  color: var(--code-text);
+  color: var(--text-code);
 }
 
+// Code blocks
 pre {
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
@@ -99,7 +101,8 @@ pre {
   padding: var(--sp-4);
   overflow-x: auto;
   margin-bottom: var(--sp-4);
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
+  line-height: 1.45;
 
   code {
     padding: 0;
@@ -109,37 +112,57 @@ pre {
   }
 }
 
+// Blockquotes - Minimal Publish style
 blockquote {
-  border-left: 3px solid var(--border);
+  border-left: var(--blockquote-border-thickness, 1px) solid
+    var(--blockquote-border-color, var(--quote-opening-modifier));
   padding-left: var(--sp-4);
-  color: var(--text-muted);
-  margin-bottom: var(--sp-4);
+  color: var(--blockquote-color, var(--text-blockquote));
+  margin-bottom: var(--p-spacing);
+  font-style: var(--blockquote-style, normal);
 }
 
 hr {
   border: none;
-  border-top: 1px solid var(--border);
+  border-top: var(--border-width) solid var(--border);
   margin: var(--sp-8) 0;
 }
 
+// Tables - Minimal Publish style (borderless by default)
 table {
   width: 100%;
   border-collapse: collapse;
+  border: var(--border-width) solid var(--border-color, var(--border));
+  margin-block-start: 1em;
   margin-bottom: var(--sp-4);
 
   th,
   td {
-    padding: var(--sp-2) var(--sp-3);
-    border: 1px solid var(--border);
+    padding: var(--table-cell-padding);
     text-align: left;
+
+    &:first-child {
+      padding-left: var(--table-edge-cell-padding-first);
+    }
+
+    &:last-child {
+      padding-right: var(--table-edge-cell-padding-last);
+    }
   }
 
   th {
-    background: var(--bg-secondary);
-    font-weight: 600;
+    font-weight: var(--bold-weight);
+    font-size: var(--table-header-size, inherit);
+    border-bottom: var(--table-header-border-width, 0)
+      solid var(--border-color, var(--border));
   }
+}
 
-  tr:nth-child(even) {
-    background: var(--bg-secondary);
-  }
+// Text helpers
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-faint {
+  color: var(--text-faint);
 }

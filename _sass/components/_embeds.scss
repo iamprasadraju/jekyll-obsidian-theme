@@ -1,18 +1,18 @@
-// Note Embed Styles
+// Note Embed Styles - Minimal Publish
 
 .note-embed {
   margin: var(--sp-4) 0;
-  border: 1px solid var(--border);
+  border: var(--border-width) solid var(--border);
   border-radius: var(--radius);
-  background: var(--bg-secondary);
+  background: var(--background-secondary);
   overflow: hidden;
 }
 
 .note-embed-title {
   padding: var(--sp-2) var(--sp-3);
-  border-bottom: 1px solid var(--border);
+  border-bottom: var(--border-width) solid var(--border);
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--bold-weight);
 
   a {
     color: var(--link);

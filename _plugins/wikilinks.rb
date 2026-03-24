@@ -501,7 +501,45 @@ module Jekyll
       # Deduplicate edges
       edges.uniq!
 
-      # Assign sequential IDs so DataSet can index them properly
+      # ─── Add test nodes for graph performance testing ───
+      test_count = site.config.dig("obsidian", "graph", "test_nodes") || 0
+      if test_count > 0
+        test_groups = %w[test-concepts test-daily test-guides test-projects test-research test-people test-places test-ideas]
+        real_node_count = nodes.length
+        srand(42) # Deterministic random for reproducible layouts
+
+        test_count.times do |i|
+          node_id = real_node_count + i
+          group = test_groups[i % test_groups.length]
+          label = "#{group.sub('test-', '').capitalize} #{'%03d' % (i + 1)}"
+
+          nodes << {
+            "id" => node_id,
+            "label" => label,
+            "url" => "#test-node-#{node_id}",
+            "group" => group
+          }
+        end
+
+        # Create edges between test nodes (2-4 per node)
+        (real_node_count...(real_node_count + test_count)).each do |from_id|
+          num_edges = 2 + rand(3)
+          num_edges.times do
+            to_id = real_node_count + rand(test_count)
+            next if to_id == from_id
+            edges << { "from" => from_id, "to" => to_id }
+          end
+        end
+
+        # Connect some test nodes to real nodes (10% of test nodes)
+        (test_count / 10).times do
+          test_id = real_node_count + rand(test_count)
+          real_id = rand(real_node_count)
+          edges << { "from" => test_id, "to" => real_id }
+        end
+      end
+
+      # Assign sequential edge IDs
       edges.each_with_index { |edge, i| edge["id"] = i }
 
       graph_data = { "nodes" => nodes, "edges" => edges }

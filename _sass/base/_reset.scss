@@ -19,9 +19,10 @@ html {
 body {
   font-family: var(--font-sans);
   font-size: var(--font-size-base);
+  font-weight: var(--normal-weight);
   line-height: var(--line-height);
   color: var(--text-normal);
-  background-color: var(--bg-primary);
+  background-color: var(--background-primary);
   overflow: hidden;
 }
 
@@ -91,7 +92,7 @@ ol {
 
 // Selection
 ::selection {
-  background: var(--accent-muted);
+  background: var(--text-selection);
   color: var(--text-normal);
 }
 

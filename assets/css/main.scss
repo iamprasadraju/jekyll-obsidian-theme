@@ -2,6 +2,7 @@
 ---
 
 // Obsidian Theme - CSS Entry Point
+// Minimal Publish inspired
 // Compiled by Jekyll's Sass processor
 
 // ─── Base ──────────────────────────────────────────────
@@ -28,4 +29,11 @@
 @use "components/graph-view" as *;
 @use "components/syntax" as *;
 @use "components/embeds" as *;
+@use "components/slides" as *;
 @use "components/print" as print;
+
+// ─── Features (Minimal Publish) ───────────────────────
+@use "features/cards" as *;
+@use "features/image-grid" as *;
+@use "features/table-helpers" as *;
+@use "features/helpers" as *;

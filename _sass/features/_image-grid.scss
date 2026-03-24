@@ -1,0 +1,105 @@
+// Image Grid & Image Zoom - Minimal Publish
+
+// Image grid: consecutive images become columns
+.img-grid .note-content > div:has(img),
+.img-grid .note-content p:has(> img ~ img),
+.img-grid .note-content p:has(> .image-embed ~ .image-embed) {
+  display: grid;
+  margin-block-start: var(--img-grid-gap);
+  margin-block-end: var(--img-grid-gap);
+  grid-column-gap: var(--img-grid-gap);
+  grid-row-gap: 0;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+}
+
+.img-grid .note-content img {
+  object-fit: var(--img-grid-fit);
+  align-self: stretch;
+  background-color: var(--img-grid-background);
+  width: 100%;
+}
+
+.img-grid .note-content > div:has(img) > br,
+.img-grid .note-content p:has(> img) > br,
+.img-grid .note-content p:empty {
+  display: none;
+}
+
+// Image zoom (lightbox)
+.note-content .img-zoom,
+.note-content .img-zoom img {
+  cursor: zoom-in;
+}
+
+.lightbox {
+  z-index: 99999;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  top: 0;
+  left: 0;
+  background: var(--img-zoom-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition);
+  cursor: zoom-out;
+
+  &.is-visible {
+    opacity: 1;
+  }
+
+  img {
+    max-width: var(--img-zoom-max-width);
+    max-height: var(--img-zoom-max-height);
+    object-fit: contain;
+    cursor: zoom-out;
+  }
+}
+
+// Image filters
+.note-content {
+  img[src$="#invert"] {
+    .theme-dark & {
+      filter: invert(1) hue-rotate(180deg);
+      mix-blend-mode: screen;
+    }
+  }
+
+  img[src$="#invertW"] {
+    [data-theme="light"] & {
+      filter: invert(1) hue-rotate(180deg);
+    }
+  }
+
+  img[src$="#circle"] {
+    border-radius: 50%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+  }
+
+  img[src$="#outline"] {
+    border: var(--border-width) solid var(--border);
+  }
+}
+
+// Image width helpers
+.note-content .img-100 img {
+  width: 100%;
+}
+
+.note-content .img-max img {
+  max-width: var(--max-width);
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.note-content .img-wide img {
+  max-width: 75%;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}

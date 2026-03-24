@@ -1,5 +1,5 @@
 # Obsidian Theme for Jekyll
-# A note-taking focused Jekyll theme inspired by Obsidian
+# Minimal Publish inspired theme
 
 title: "My Vault"
 description: "A personal knowledge base"
@@ -43,10 +43,17 @@ obsidian:
   search:
     enabled: true
     shortcut: "k"
-  # Graph view
+  # Graph view (force-graph, Barnes-Hut O(n log n))
   graph:
     enabled: true
     lazy_load: true
+    mini_graph: true
+    test_nodes: 300  # Set to 0 to disable fake test nodes
+  # Slide overlay (Andy Matuschak style)
+  slides:
+    enabled: true
+    pane_width: 625
+    resizable: true
   # Tags
   tags:
     enabled: true
@@ -54,29 +61,35 @@ obsidian:
   code:
     copy_button: true
     syntax_highlight: true
-  # Callouts
+  # Callouts - Catppuccin Mocha colors
   callouts:
     note:
-      color: "#60a5fa"
+      color: "#6c99bb"
       icon: "info-circle"
     tip:
-      color: "#34d399"
+      color: "#a8c373"
       icon: "lightbulb"
     info:
-      color: "#60a5fa"
+      color: "#6c99bb"
       icon: "info"
     warning:
-      color: "#fbbf24"
+      color: "#e5b567"
       icon: "exclamation-triangle"
     danger:
-      color: "#f87171"
+      color: "#d04255"
       icon: "fire"
     example:
-      color: "#c084fc"
+      color: "#9e86c8"
       icon: "list-ol"
     quote:
-      color: "#9ca3af"
+      color: "#999999"
       icon: "quote-left"
+  # Features (Minimal Publish helper classes)
+  features:
+    focus_mode: true
+    colorful_headings: true
+    image_grid: true
+    cards: true
   # Optional features
   mermaid: false
   mathjax: false

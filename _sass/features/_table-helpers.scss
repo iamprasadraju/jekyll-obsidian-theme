@@ -1,0 +1,145 @@
+// Table Helper Classes - Minimal Publish
+
+// Width control
+.table-100 table {
+  width: 100%;
+}
+
+.table-max table {
+  max-width: var(--max-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.table-wide table {
+  max-width: 75%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+// Font size
+.table-small table {
+  --table-text-size: 85%;
+  font-size: var(--table-text-size);
+}
+
+.table-tiny table {
+  --table-text-size: 75%;
+  font-size: var(--table-text-size);
+}
+
+// Text wrapping
+.table-nowrap {
+  --table-white-space: nowrap;
+}
+
+.table-wrap {
+  --table-white-space: normal;
+}
+
+// Full cell borders
+.table-lines {
+  --table-border-width: var(--border-width);
+  --table-header-border-width: var(--border-width);
+  --table-column-first-border-width: var(--border-width);
+  --table-column-last-border-width: var(--border-width);
+  --table-row-last-border-width: var(--border-width);
+  --table-edge-cell-padding-first: 10px;
+  --table-edge-cell-padding-last: 10px;
+
+  table {
+    th,
+    td {
+      border: var(--border-width) solid var(--background-modifier-border);
+    }
+  }
+}
+
+// Row borders only
+.row-lines {
+  table tbody > tr > td {
+    border-bottom: var(--border-width) solid var(--background-modifier-border);
+  }
+
+  table tbody > tr:last-child > td {
+    border-bottom: none;
+  }
+}
+
+// Column borders only
+.col-lines {
+  table tbody > tr > td:not(:last-child) {
+    border-right: var(--border-width) solid var(--background-modifier-border);
+  }
+}
+
+// Alternating row backgrounds
+.row-alt {
+  --table-row-alt-background: var(--background-table-rows);
+  --table-edge-cell-padding-first: 10px;
+
+  table tbody > tr:nth-child(even) {
+    background: var(--table-row-alt-background);
+  }
+}
+
+// Alternating column backgrounds
+.col-alt {
+  table tbody > tr > td:nth-child(even) {
+    background: var(--background-table-rows);
+  }
+}
+
+// Tabular numbers
+.table-tabular table {
+  font-variant-numeric: tabular-nums;
+}
+
+// Auto row numbers
+.table-numbers {
+  table {
+    counter-reset: section;
+  }
+
+  table > thead > tr > th:first-child::before {
+    content: " ";
+    padding-right: 0.5em;
+    display: inline-block;
+    min-width: 2em;
+  }
+
+  table > tbody > tr > td:first-child::before {
+    counter-increment: section;
+    content: counter(section) " ";
+    text-align: center;
+    padding-right: 0.5em;
+    display: inline-block;
+    min-width: 2em;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// First column width
+.table-col-1-150 table td:first-child {
+  width: 150px;
+}
+
+.table-col-1-200 table td:first-child {
+  width: 200px;
+}
+
+// Row hover effect
+.row-hover {
+  table tbody > tr:hover {
+    background: hsla(201, 30%, 40%, 0.1);
+  }
+
+  --table-edge-cell-padding-first: 10px;
+}
+
+// Remove bottom border from last row
+table tbody > tr:last-child > td {
+  border-bottom: var(--table-row-last-border-width, 0)
+    solid var(--background-modifier-border);
+}
