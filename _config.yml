@@ -3,8 +3,8 @@
 
 title: "My Vault"
 description: "A personal knowledge base"
-baseurl: ""
-url: ""
+baseurl: "/jekyll-obsidian-theme"
+url: "https://iamprasadraju.github.io"
 
 permalink: pretty
 

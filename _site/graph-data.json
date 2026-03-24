@@ -3,55 +3,55 @@
     {
       "id": 0,
       "label": "Evergreen Notes",
-      "url": "/concepts/evergreen-notes/",
+      "url": "/jekyll-obsidian-theme/concepts/evergreen-notes/",
       "group": "concepts"
     },
     {
       "id": 1,
       "label": "Concepts",
-      "url": "/concepts/index/",
+      "url": "/jekyll-obsidian-theme/concepts/index/",
       "group": "concepts"
     },
     {
       "id": 2,
       "label": "Zettelkasten",
-      "url": "/concepts/zettelkasten/",
+      "url": "/jekyll-obsidian-theme/concepts/zettelkasten/",
       "group": "concepts"
     },
     {
       "id": 3,
       "label": "Daily Note - March 23, 2026",
-      "url": "/daily/2026-03-23/",
+      "url": "/jekyll-obsidian-theme/daily/2026-03-23/",
       "group": "daily"
     },
     {
       "id": 4,
       "label": "Daily Notes Template",
-      "url": "/daily/template/",
+      "url": "/jekyll-obsidian-theme/daily/template/",
       "group": "daily"
     },
     {
       "id": 5,
       "label": "Getting Started",
-      "url": "/guides/getting-started/",
+      "url": "/jekyll-obsidian-theme/guides/getting-started/",
       "group": "guides"
     },
     {
       "id": 6,
       "label": "Markdown Features",
-      "url": "/guides/markdown-features/",
+      "url": "/jekyll-obsidian-theme/guides/markdown-features/",
       "group": "guides"
     },
     {
       "id": 7,
       "label": "Projects",
-      "url": "/projects/index/",
+      "url": "/jekyll-obsidian-theme/projects/index/",
       "group": "projects"
     },
     {
       "id": 8,
       "label": "Project Alpha",
-      "url": "/projects/project-alpha/",
+      "url": "/jekyll-obsidian-theme/projects/project-alpha/",
       "group": "projects"
     },
     {

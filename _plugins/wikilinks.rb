@@ -75,7 +75,7 @@ module Jekyll
     # ── Wikilink Processing ───────────────────────────────
     # Matches [[target]], [[target|display]], [[target#heading]], [[target#heading|display]]
     # Also matches embeds: ![[target]] and ![[target#heading]]
-    def process_wikilinks(content, lookup, doc_url, backlinks, embeds = {})
+    def process_wikilinks(content, lookup, doc_url, backlinks, embeds = {}, baseurl = "")
       # Preserve code blocks first
       preserved, blocks = preserve_code_blocks(content)
 
@@ -97,9 +97,9 @@ module Jekyll
           else
             embed_content = get_embed_content(doc, heading)
             # Recursively process embedded content
-            embed_content = process_wikilinks(embed_content, lookup, doc_url, backlinks, embeds)
+            embed_content = process_wikilinks(embed_content, lookup, doc_url, backlinks, embeds, baseurl)
             "<div class='note-embed' data-embed-source='#{doc.url}'>" \
-              "<div class='note-embed-title'><a href='#{doc.url}'>#{doc.data['title'] || target}</a></div>" \
+              "<div class='note-embed-title'><a href='#{baseurl}#{doc.url}'>#{doc.data['title'] || target}</a></div>" \
               "<div class='note-embed-content'>#{embed_content}</div>" \
             "</div>"
           end
@@ -116,7 +116,7 @@ module Jekyll
 
         doc = resolve_wikilink(target, lookup)
         if doc
-          url = doc.url
+          url = "#{baseurl}#{doc.url}"
           url += "##{heading_slug(heading)}" if heading
 
           # Track backlink
@@ -306,7 +306,7 @@ module Jekyll
           end
 
           # Process wikilinks (modifies content)
-          doc.content = process_wikilinks(doc.content, lookup, doc.url, backlinks)
+          doc.content = process_wikilinks(doc.content, lookup, doc.url, backlinks, {}, site.baseurl)
 
           # NOTE: callout processing happens in post_convert hook (after Kramdown HTML conversion)
         end
@@ -316,7 +316,7 @@ module Jekyll
       site.pages.each do |page|
         next unless page.output_ext == ".html"
         raw_contents[page.url] = page.content.dup
-        page.content = process_wikilinks(page.content, lookup, page.url, backlinks)
+        page.content = process_wikilinks(page.content, lookup, page.url, backlinks, {}, site.baseurl)
         # NOTE: callout processing happens in post_convert hook
       end
 
@@ -426,7 +426,7 @@ module Jekyll
 
           index << {
             "title" => doc.data["title"] || doc.basename_without_ext,
-            "url" => doc.url,
+            "url" => "#{site.baseurl}#{doc.url}",
             "path" => doc.relative_path.sub(/^_[^\/]+\//, "").sub(/\.md$/, ""),
             "content" => plain,
             "tags" => (doc.data["tags"] || []).join(" "),
@@ -478,7 +478,7 @@ module Jekyll
           nodes << {
             "id" => node_id,
             "label" => doc.data["title"] || doc.basename_without_ext,
-            "url" => doc.url,
+            "url" => "#{site.baseurl}#{doc.url}",
             "group" => group
           }
         end

@@ -1,1 +1,1 @@
-Sitemap: http://localhost:4000/sitemap.xml
+Sitemap: https://iamprasadraju.github.io/jekyll-obsidian-theme/sitemap.xml
