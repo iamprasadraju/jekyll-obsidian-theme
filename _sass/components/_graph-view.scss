@@ -115,14 +115,22 @@
 
 // Sidebar mini graph
 .graph-mini {
-  height: 180px;
+  height: 260px;
+  min-height: 120px;
+  max-height: 60vh;
+  resize: vertical;
   border-radius: var(--radius);
   overflow: hidden;
   border: var(--border-width) solid var(--border);
   background: var(--background-primary);
   position: relative;
+  cursor: grab;
+  user-select: none;
   margin-top: var(--sp-2);
-  cursor: pointer;
+
+  &:active {
+    cursor: grabbing;
+  }
 
   &:hover {
     border-color: var(--border-hover);
@@ -163,7 +171,8 @@
   }
 
   .graph-mini {
-    height: 140px;
+    height: 180px;
+    min-height: 100px;
     margin-top: var(--sp-1);
   }
 }
