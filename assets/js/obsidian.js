@@ -774,9 +774,8 @@
           if (e.to === currentNode.id) neighborIds.add(e.from)
         })
 
-        // Filter out test nodes from mini graph
         var defaultColor = isDark ? NODE_COLOR_DARK : NODE_COLOR_LIGHT
-        var focusedColor = isDark ? FOCUSED_COLOR : FOCUSED_COLOR_LIGHT
+        var focusedColor = isDark ? NODE_HOVER_COLOR : NODE_HOVER_COLOR_LIGHT
         var hoverColor = isDark ? NODE_HOVER_COLOR : NODE_HOVER_COLOR_LIGHT
 
         var miniAdjacency = buildAdjacency(
@@ -792,7 +791,7 @@
               name: n.label,
               url: n.url,
               color: n.id === currentNode.id ? focusedColor : defaultColor,
-              val: n.id === currentNode.id ? 9 : 4,
+              val: n.id === currentNode.id ? 10 : 5,
               isFocused: n.id === currentNode.id,
             }
           })
@@ -808,6 +807,7 @@
           .graphData({ nodes: nodes, links: links })
           .backgroundColor("transparent")
           .autoPauseRedraw(false)
+          .showPointerCursor(true)
           .linkColor(function (link) {
             if (miniHoveredNode !== null) {
               var adj = miniAdjacency[miniHoveredNode]
@@ -824,7 +824,7 @@
               if (adj && adj.edges.has(link.index)) return 1.5
               return 0.3
             }
-            return 0.4
+            return 0.5
           })
           .nodeColor(function (n) { return n.color })
           .nodeVal(function (n) {
@@ -851,41 +851,48 @@
               color = focusedColor
             }
 
-            var r = Math.sqrt(n.val) * 2
+            var r = Math.sqrt(n.val) * 3
             ctx.globalAlpha = opacity
             ctx.beginPath()
             ctx.arc(n.x, n.y, r, 0, 2 * Math.PI, false)
             ctx.fillStyle = color
             ctx.fill()
 
-            // Show label on hover or for focused node
-            var showMiniLabel = n.isFocused
-            if (miniHoveredNode !== null) {
-              showMiniLabel = n.id === miniHoveredNode || (miniAdjacency[miniHoveredNode] && miniAdjacency[miniHoveredNode].neighbors.has(n.id))
-            }
-
-            if (showMiniLabel && n.name) {
-              var fontSize = 9 / globalScale
-              ctx.font = fontSize + "px -apple-system, sans-serif"
-              ctx.fillStyle = isDark ? LABEL_COLOR_DARK : LABEL_COLOR_LIGHT
-              ctx.globalAlpha = opacity
-              ctx.textAlign = "center"
-              ctx.textBaseline = "top"
-              ctx.fillText(n.name, n.x, n.y + r + 2)
+            // Always show labels — Obsidian behavior
+            if (n.name) {
+              var showLabel = true
+              if (miniHoveredNode !== null) {
+                showLabel = n.id === miniHoveredNode || (miniAdjacency[miniHoveredNode] && miniAdjacency[miniHoveredNode].neighbors.has(n.id))
+              }
+              if (showLabel) {
+                var fontSize = 9 / globalScale
+                ctx.font = fontSize + "px -apple-system, sans-serif"
+                ctx.fillStyle = isDark ? LABEL_COLOR_DARK : LABEL_COLOR_LIGHT
+                ctx.globalAlpha = opacity
+                ctx.textAlign = "center"
+                ctx.textBaseline = "top"
+                ctx.fillText(n.name, n.x, n.y + r + 2)
+              }
             }
 
             ctx.globalAlpha = 1
           })
           .onNodeHover(function (node) {
             miniHoveredNode = node ? node.id : null
-            container.style.cursor = node ? "pointer" : "default"
           })
-          .d3AlphaDecay(0.04)
-          .warmupTicks(60)
-          .cooldownTicks(40)
-          .cooldownTime(2000)
+          .d3AlphaDecay(0.0228)
+          .d3VelocityDecay(0.4)
+          .warmupTicks(80)
+          .cooldownTime(5000)
           .onNodeClick(function (n) {
             if (n.url && n.url.indexOf("#") !== 0) window.location.href = n.url
+          })
+          .enableZoomInteraction(false)
+          .enablePanInteraction(false)
+          .minZoom(0.3)
+          .maxZoom(5)
+          .onEngineStop(function () {
+            miniGraphInstance.zoomToFit(600, 40)
           })
       })
     })

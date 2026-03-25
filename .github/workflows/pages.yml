@@ -36,6 +36,19 @@ jobs:
         env:
           JEKYLL_ENV: production
 
+      - name: Verify build output
+        run: |
+          echo "=== Build output ==="
+          ls -la _site/assets/css/
+          echo "=== CSS first line ==="
+          head -1 _site/assets/css/main.css
+          echo "=== Checking for raw SCSS ==="
+          if grep -q '@use' _site/assets/css/main.css; then
+            echo "ERROR: CSS contains raw SCSS directives!"
+            exit 1
+          fi
+          echo "=== Build verified ==="
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
