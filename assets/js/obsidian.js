@@ -270,6 +270,20 @@
   var graphDataCache = null
   var graphHoveredNode = null
   var graphAdjacency = {}
+  function easeOutCubic(t) {
+    return 1 - Math.pow(1 - t, 3)
+  }
+
+  function computeCircularLayout(nodes) {
+    var positions = {}
+    var cx = 0, cy = 0
+    var radius = Math.max(200, Math.sqrt(nodes.length) * 40)
+    nodes.forEach(function (n, i) {
+      var angle = (2 * Math.PI * i) / nodes.length - Math.PI / 2
+      positions[n.id] = [cx + radius * Math.cos(angle), cy + radius * Math.sin(angle)]
+    })
+    return positions
+  }
 
   // Obsidian-style colors: silver nodes, dark lines
   var NODE_COLOR_DARK = "#a9a9b2"
@@ -386,11 +400,31 @@
         var focusedColor = isDark ? FOCUSED_COLOR : FOCUSED_COLOR_LIGHT
         var hoverColor = isDark ? NODE_HOVER_COLOR : NODE_HOVER_COLOR_LIGHT
 
-        // Prepare nodes
-        var nodes = data.nodes.map(function (n) {
+        // Compute target positions: use cached or circular fallback
+        var hasCachedPositions = Object.keys(cached).length > 0
+        var fallbackPositions = computeCircularLayout(data.nodes)
+        var dynamicStagger = Math.max(3, Math.min(40, 1500 / data.nodes.length))
+
+        // Prepare nodes with off-screen starting positions
+        var nodes = data.nodes.map(function (n, i) {
           var cp = cached[n.url]
           var isFocused = n.url === currentPath
           var links = backlinkCounts[n.id] || 0
+          var targetX, targetY
+          if (cp) {
+            targetX = cp[0]
+            targetY = cp[1]
+          } else {
+            targetX = fallbackPositions[n.id][0]
+            targetY = fallbackPositions[n.id][1]
+          }
+
+          // Start off-screen: pick a random edge of the viewport
+          var angle = Math.random() * 2 * Math.PI
+          var dist = 2500 + Math.random() * 1500
+          var startX = targetX + Math.cos(angle) * dist
+          var startY = targetY + Math.sin(angle) * dist
+
           return {
             id: n.id,
             name: n.label,
@@ -399,10 +433,16 @@
             color: isFocused ? focusedColor : defaultColor,
             val: isFocused ? 8 : Math.max(4, 2 + Math.sqrt(links) * 1.5),
             isFocused: isFocused,
-            x: cp ? cp[0] : undefined,
-            y: cp ? cp[1] : undefined,
+            x: startX,
+            y: startY,
+            fx: startX,
+            fy: startY,
+            targetX: targetX,
+            targetY: targetY,
             hoverOpacity: 1,
             targetOpacity: 1,
+            flyInDelay: i * dynamicStagger,
+            flyInDone: false,
           }
         })
 
@@ -505,44 +545,152 @@
             graphHoveredNode = node ? node.id : null
             container.style.cursor = node ? "pointer" : "default"
           })
-          .d3AlphaDecay(0.005)
-          .d3VelocityDecay(0.15)
-          .warmupTicks(30)
-          .cooldownTicks(60)
-          .cooldownTime(3000)
+          .d3AlphaDecay(0.02)
+          .d3VelocityDecay(0.4)
+          .warmupTicks(0)
+          .cooldownTicks(0)
+          .cooldownTime(0)
           .minZoom(0.08)
           .maxZoom(10)
           .onNodeClick(function (n) {
             if (n.url && n.url.indexOf("#") !== 0) window.location.href = n.url
           })
 
-        // D3-Force: center, charge repulsion, link spring
-        fg.d3Force('center').strength(0.05)
-        fg.d3Force('charge').strength(-150).distanceMax(350)
-        fg.d3Force('link').distance(120).strength(0.3)
+        // ─── Staggered Fly-In Animation ──────────────────
+        var animStartTime = null
+        var flyInDuration = 800
+        var animDone = false
+        var hasFittedAfterAnim = false
 
-        // Smooth opening: zoomToFit during simulation
-        var hasFitted = false
-        fg.onEngineTick(function () {
-          if (!hasFitted) {
-            hasFitted = true
-            fg.zoomToFit(1200, 80)
+        function runFlyInAnimation() {
+          if (animDone) return
+
+          var allDone = true
+          nodes.forEach(function (n) {
+            if (n.flyInDone) return
+            var elapsed = performance.now() - animStartTime - n.flyInDelay
+            if (elapsed < 0) {
+              allDone = false
+              return
+            }
+            var t = Math.min(elapsed / flyInDuration, 1)
+            var eased = easeOutCubic(t)
+            n.x = n.fx = n.targetX - (n.targetX - n._startX) * (1 - eased)
+            n.y = n.fy = n.targetY - (n.targetY - n._startY) * (1 - eased)
+            if (t >= 1) {
+              n.x = n.fx = n.targetX
+              n.y = n.fy = n.targetY
+              n.flyInDone = true
+            } else {
+              allDone = false
+            }
+          })
+
+          if (allDone) {
+            animDone = true
+            onFlyInComplete()
+          }
+        }
+
+        function onFlyInComplete() {
+          // Remove position pins so nodes become draggable
+          nodes.forEach(function (n) {
+            delete n.fx
+            delete n.fy
+            delete n._startX
+            delete n._startY
+            delete n.flyInDelay
+            delete n.flyInDone
+            delete n.targetX
+            delete n.targetY
+          })
+
+          // Restore force settings for interactive use
+          fg.d3AlphaDecay(0.005)
+          fg.d3VelocityDecay(0.15)
+          fg.warmupTicks(10)
+          fg.cooldownTicks(40)
+          fg.cooldownTime(2000)
+
+          // Reheat with gentle settings
+          fg.d3ReheatSimulation()
+
+          // Zoom to fit after settle
+          fg.onEngineStop(function () {
+            if (!hasFittedAfterAnim) {
+              hasFittedAfterAnim = true
+              fg.zoomToFit(600, 60)
+            }
+            // Cache positions
+            setTimeout(function () {
+              var positions = {}
+              fg.graphData().nodes.forEach(function (n) {
+                if (n.x !== undefined && n.y !== undefined) {
+                  positions[n.url] = [n.x, n.y]
+                }
+              })
+              localStorage.setItem("graph-pos", JSON.stringify(positions))
+            }, 800)
+          })
+        }
+
+        // Use onRenderFramePre to drive the animation each frame
+        fg.onRenderFramePre(function () {
+          if (!animDone) {
+            runFlyInAnimation()
           }
         })
 
-        fg.onEngineStop(function () {
-          fg.zoomToFit(600, 60)
-          // Cache positions
-          setTimeout(function () {
-            var positions = {}
-            fg.graphData().nodes.forEach(function (n) {
-              if (n.x !== undefined && n.y !== undefined) {
-                positions[n.url] = [n.x, n.y]
-              }
-            })
-            localStorage.setItem("graph-pos", JSON.stringify(positions))
-          }, 800)
-        })
+        // If cached positions exist, skip fly-in — go straight to interactive mode
+        if (hasCachedPositions) {
+          animDone = true
+          nodes.forEach(function (n) {
+            n.x = n.targetX
+            n.y = n.targetY
+            delete n.fx
+            delete n.fy
+            delete n._startX
+            delete n._startY
+            delete n.flyInDelay
+            delete n.flyInDone
+            delete n.targetX
+            delete n.targetY
+          })
+
+          // Restore normal force settings
+          fg.d3AlphaDecay(0.005)
+          fg.d3VelocityDecay(0.15)
+          fg.warmupTicks(10)
+          fg.cooldownTicks(40)
+          fg.cooldownTime(2000)
+
+          var hasFitted = false
+          fg.onEngineTick(function () {
+            if (!hasFitted) {
+              hasFitted = true
+              fg.zoomToFit(1200, 80)
+            }
+          })
+          fg.onEngineStop(function () {
+            fg.zoomToFit(600, 60)
+            setTimeout(function () {
+              var positions = {}
+              fg.graphData().nodes.forEach(function (n) {
+                if (n.x !== undefined && n.y !== undefined) {
+                  positions[n.url] = [n.x, n.y]
+                }
+              })
+              localStorage.setItem("graph-pos", JSON.stringify(positions))
+            }, 800)
+          })
+        } else {
+          // Store starting positions and set animation start time
+          nodes.forEach(function (n) {
+            n._startX = n.x
+            n._startY = n.y
+          })
+          animStartTime = performance.now()
+        }
 
         // Arrow key panning
         function handleGraphKeys(e) {
