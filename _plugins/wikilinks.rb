@@ -603,6 +603,74 @@ module Jekyll
       icons[type] || icons["note"]
     end
   end
+
+  # ═══════════════════════════════════════════════════════
+  # File Tree Generator
+  # Builds a recursive folder tree for the sidebar
+  # ═══════════════════════════════════════════════════════
+  class FileTreeGenerator < Generator
+    safe true
+    priority :low
+
+    def generate(site)
+      tree = { "name" => "_notes", "type" => "folder", "children" => [] }
+
+      site.collections.each do |name, collection|
+        collection.docs.each do |doc|
+          next unless doc.output_ext == ".html"
+
+          # Get relative path: _notes/Machine Learning/Supervised/Regression.md
+          # → ["Machine Learning", "Supervised", "Regression.md"]
+          parts = doc.relative_path.sub(/^_[^\/]+\//, "").sub(/^\//, "").split("/")
+          next if parts.empty?
+
+          insert_into_tree(tree, parts, doc)
+        end
+      end
+
+      # Sort each level: folders first, then files, alphabetical
+      sort_tree(tree)
+
+      site.data["file_tree"] = tree
+    end
+
+    private
+
+    def insert_into_tree(node, parts, doc)
+      if parts.length == 1
+        # Leaf: add note
+        node["children"] << {
+          "name" => parts[0],
+          "type" => "note",
+          "title" => doc.data["title"] || doc.basename_without_ext,
+          "url" => doc.url
+        }
+      else
+        # Folder: find or create child folder
+        folder_name = parts[0]
+        folder = node["children"].find { |c| c["type"] == "folder" && c["name"] == folder_name }
+
+        unless folder
+          folder = { "name" => folder_name, "type" => "folder", "children" => [] }
+          node["children"] << folder
+        end
+
+        insert_into_tree(folder, parts[1..], doc)
+      end
+    end
+
+    def sort_tree(node)
+      return unless node["children"]
+
+      node["children"].each { |child| sort_tree(child) }
+
+      node["children"].sort_by! do |child|
+        type_order = child["type"] == "folder" ? 0 : 1
+        name = child["type"] == "note" ? (child["title"] || child["name"]) : child["name"]
+        [type_order, name.downcase]
+      end
+    end
+  end
 end
 
 # Register the post_convert hook
