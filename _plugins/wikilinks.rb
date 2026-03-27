@@ -630,8 +630,8 @@ module Jekyll
 
       # Sort each level: folders first, then files, alphabetical
       sort_tree(tree)
-
       site.data["file_tree"] = tree
+      site.data["file_tree_html"] = render_tree(tree["children"], 0, site.baseurl)
     end
 
     private
@@ -669,6 +669,30 @@ module Jekyll
         name = child["type"] == "note" ? (child["title"] || child["name"]) : child["name"]
         [type_order, name.downcase]
       end
+    end
+
+    def render_tree(children, depth, baseurl)
+      html = ""
+      children.each do |child|
+        if child["type"] == "folder"
+          html << "<li class='file-tree-item file-tree-folder' data-folder='#{child["name"]}'>"
+          html << "<button class='file-tree-link' style='--depth: #{depth}' data-action='toggle-folder' aria-expanded='false'>"
+          html << "<span class='file-tree-expander'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z'/></svg></span>"
+          html << "<span class='file-tree-icon'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/></svg></span>"
+          html << "<span class='file-tree-label'>#{child["name"]}</span></button>"
+          html << "<ul class='file-tree-children'>"
+          html << render_tree(child["children"], depth + 1, baseurl)
+          html << "</ul></li>"
+        elsif child["type"] == "note"
+          url = "#{baseurl}#{child["url"]}"
+          title = child["title"] || child["name"].sub(/\.md$/, "")
+          html << "<li class='file-tree-item'>"
+          html << "<a href='#{url}' class='file-tree-link' style='--depth: #{depth}'>"
+          html << "<span class='file-tree-icon'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z'/></svg></span>"
+          html << "<span class='file-tree-label'>#{title}</span></a></li>"
+        end
+      end
+      html
     end
   end
 end
