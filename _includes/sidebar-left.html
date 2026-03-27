@@ -20,89 +20,30 @@
   </div>
 
   <nav class="file-tree" id="file-tree">
-    {% assign all_notes = site.notes | sort: "title" %} {% comment %} Group
-    notes by their directory path {% endcomment %} {% assign folder_groups = ""
-    | split: "" %} {% assign root_notes = "" | split: "" %} {% for note in
-    all_notes %} {% assign path_parts = note.path | split: "/" %} {% if
-    path_parts.size > 2 %} {% assign folder_name = path_parts[1] %} {% unless
-    folder_groups contains folder_name %} {% assign folder_groups =
-    folder_groups | push: folder_name %} {% endunless %} {% else %} {% assign
-    root_notes = root_notes | push: note %} {% endif %} {% endfor %}
-
     <ul class="file-tree-list">
-      {% for note in root_notes %}
-      <li class="file-tree-item">
-        <a
-          href="{{ note.url | relative_url }}"
-          class="file-tree-link {% if page.url == note.url %}is-active{% endif %}"
-          style="--depth: 0"
-        >
-          <span class="file-tree-icon">
-            <svg viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"
-              />
-            </svg>
-          </span>
-          <span class="file-tree-label"
-            >{{ note.title | default: note.name | remove: ".md" }}</span
-          >
-        </a>
-      </li>
-      {% endfor %} {% for folder in folder_groups %} {% assign folder_prefix =
-      "/" | append: folder | append: "/" %} {% assign folder_notes = all_notes |
-      where_exp: "n", "n.path contains folder_prefix" %}
-      <li class="file-tree-item file-tree-folder" data-folder="{{ folder }}">
-        <button
-          class="file-tree-link"
-          style="--depth: 0"
-          data-action="toggle-folder"
-          aria-expanded="false"
-        >
-          <span class="file-tree-expander">
-            <svg viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"
-              />
-            </svg>
-          </span>
-          <span class="file-tree-icon">
-            <svg viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"
-              />
-            </svg>
-          </span>
-          <span class="file-tree-label">{{ folder | capitalize }}</span>
-        </button>
-        <ul class="file-tree-children">
-          {% for note in folder_notes %} {% unless note.name == "index.md" %}
+      {% if site.data.file_tree and site.data.file_tree.children %}
+        {% include tree-children.html nodes=site.data.file_tree.children depth=0 %}
+      {% else %}
+        {% assign all_notes = site.notes | sort: "title" %}
+        {% for note in all_notes %}
+          {% unless note.name == "index.md" %}
           <li class="file-tree-item">
             <a
               href="{{ note.url | relative_url }}"
               class="file-tree-link {% if page.url == note.url %}is-active{% endif %}"
-              style="--depth: 1"
+              style="--depth: 0"
             >
               <span class="file-tree-icon">
                 <svg viewBox="0 0 24 24">
-                  <path
-                    fill="currentColor"
-                    d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"
-                  />
+                  <path fill="currentColor" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
                 </svg>
               </span>
-              <span class="file-tree-label"
-                >{{ note.title | default: note.name | remove: ".md" }}</span
-              >
+              <span class="file-tree-label">{{ note.title | default: note.name | remove: ".md" }}</span>
             </a>
           </li>
-          {% endunless %} {% endfor %}
-        </ul>
-      </li>
-      {% endfor %}
+          {% endunless %}
+        {% endfor %}
+      {% endif %}
     </ul>
   </nav>
 
@@ -137,30 +78,9 @@
         <circle cx="6" cy="6" r="2" fill="currentColor" />
         <circle cx="18" cy="6" r="2" fill="currentColor" />
         <circle cx="12" cy="18" r="2" fill="currentColor" />
-        <line
-          x1="6"
-          y1="6"
-          x2="18"
-          y2="6"
-          stroke="currentColor"
-          stroke-width="1.2"
-        />
-        <line
-          x1="6"
-          y1="6"
-          x2="12"
-          y2="18"
-          stroke="currentColor"
-          stroke-width="1.2"
-        />
-        <line
-          x1="18"
-          y1="6"
-          x2="12"
-          y2="18"
-          stroke="currentColor"
-          stroke-width="1.2"
-        />
+        <line x1="6" y1="6" x2="18" y2="6" stroke="currentColor" stroke-width="1.2" />
+        <line x1="6" y1="6" x2="12" y2="18" stroke="currentColor" stroke-width="1.2" />
+        <line x1="18" y1="6" x2="12" y2="18" stroke="currentColor" stroke-width="1.2" />
       </svg>
       <span>Graph</span>
     </button>
