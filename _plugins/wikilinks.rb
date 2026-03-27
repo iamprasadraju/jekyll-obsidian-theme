@@ -603,6 +603,90 @@ module Jekyll
       icons[type] || icons["note"]
     end
   end
+
+  # ═══════════════════════════════════════════════════════
+  # File Tree Generator
+  # Builds a recursive folder tree for the sidebar
+  # ═══════════════════════════════════════════════════════
+  class FileTreeGenerator < Generator
+    safe true
+    priority :low
+
+    def generate(site)
+      tree = { "name" => "_notes", "type" => "folder", "children" => [] }
+
+      site.collections.each do |name, collection|
+        collection.docs.each do |doc|
+          next unless doc.output_ext == ".html"
+
+          parts = doc.relative_path.sub(/^_[^\/]+\//, "").sub(/^\//, "").split("/")
+          next if parts.empty?
+
+          insert_into_tree(tree, parts, doc)
+        end
+      end
+
+      sort_tree(tree)
+      site.data["file_tree"] = tree
+      site.data["file_tree_html"] = render_tree(tree["children"], 0, site.baseurl, "")
+    end
+
+    private
+
+    def insert_into_tree(node, parts, doc)
+      if parts.length == 1
+        node["children"] << {
+          "name" => parts[0],
+          "type" => "note",
+          "title" => doc.data["title"] || doc.basename_without_ext,
+          "url" => doc.url
+        }
+      else
+        folder_name = parts[0]
+        folder = node["children"].find { |c| c["type"] == "folder" && c["name"] == folder_name }
+        unless folder
+          folder = { "name" => folder_name, "type" => "folder", "children" => [] }
+          node["children"] << folder
+        end
+        insert_into_tree(folder, parts[1..], doc)
+      end
+    end
+
+    def sort_tree(node)
+      return unless node["children"]
+      node["children"].each { |child| sort_tree(child) }
+      node["children"].sort_by! do |child|
+        type_order = child["type"] == "folder" ? 0 : 1
+        name = child["type"] == "note" ? (child["title"] || child["name"]) : child["name"]
+        [type_order, name.downcase]
+      end
+    end
+
+    def render_tree(children, depth, baseurl, current_url)
+      html = ""
+      children.each do |child|
+        if child["type"] == "folder"
+          html << "<li class='file-tree-item file-tree-folder' data-folder='#{child["name"]}'>"
+          html << "<button class='file-tree-link' style='--depth: #{depth}' data-action='toggle-folder' aria-expanded='false'>"
+          html << "<span class='file-tree-expander'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z'/></svg></span>"
+          html << "<span class='file-tree-icon'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/></svg></span>"
+          html << "<span class='file-tree-label'>#{child["name"]}</span></button>"
+          html << "<ul class='file-tree-children'>"
+          html << render_tree(child["children"], depth + 1, baseurl, current_url)
+          html << "</ul></li>"
+        elsif child["type"] == "note"
+          url = "#{baseurl}#{child["url"]}"
+          active = (current_url == child["url"]) ? " is-active" : ""
+          title = child["title"] || child["name"].sub(/\.md$/, "")
+          html << "<li class='file-tree-item'>"
+          html << "<a href='#{url}' class='file-tree-link#{active}' style='--depth: #{depth}'>"
+          html << "<span class='file-tree-icon'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z'/></svg></span>"
+          html << "<span class='file-tree-label'>#{title}</span></a></li>"
+        end
+      end
+      html
+    end
+  end
 end
 
 # Register the post_convert hook
