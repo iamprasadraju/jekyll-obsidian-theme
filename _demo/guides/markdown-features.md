@@ -1,57 +1,140 @@
 ---
 title: "Markdown Features"
-tags: [guide, syntax, markdown]
+tags: [guide, markdown, syntax]
 date: 2026-03-23
 ---
 
-This note demonstrates supported Markdown features.
+This note demonstrates all supported markdown features in the Obsidian theme.
 
-## Wikilinks
+## Text Formatting
 
-Link to other notes:
+- **Bold text** with `**double asterisks**`
+- *Italic text* with `*single asterisks*`
+- ~~Strikethrough~~ with `~~double tildes~~`
+- `Inline code` with backticks
+- ==Highlighted text== (if supported)
 
-```markdown
-[[note-name]]              → Links to note
-[[note-name|Display Text]] → Links with custom text
-[[folder/note-name]]       → Links to note in folder
-[[note#heading]]           → Links to heading
-![[note-name]]             → Embeds note content
-```
+## Links
 
-## Callouts
+### External Links
+- [GitHub](https://github.com)
+- [Obsidian](https://obsidian.md)
+
+### Wikilinks (Internal Links)
+- `[[note-name]]` — Basic wikilink
+- `[[note-name|Display Text]]` — Wikilink with alias
+
+Examples:
+- [[concepts/zettelkasten|Zettelkasten Method]]
+- [[guides/getting-started|Getting Started]]
+
+## Lists
+
+### Unordered List
+- First item
+- Second item
+  - Nested item
+  - Another nested item
+- Third item
+
+### Ordered List
+1. First step
+2. Second step
+3. Third step
+
+### Task List
+- [x] Create vault structure
+- [x] Add wikilink support
+- [x] Implement search
+- [ ] Add graph view
+- [ ] Mobile optimization
+
+## Blockquotes
+
+> This is a regular blockquote.
+> It can span multiple lines.
+
+### Obsidian Callouts
 
 > [!note]
-> This is a note callout.
+> Notes are for general information and documentation.
 
 > [!tip]
-> This is a tip.
+> Tips provide helpful suggestions and best practices.
+
+> [!info]
+> Info callouts are great for supplementary information.
 
 > [!warning]
-> This is a warning.
+> Warnings alert users to potential issues or important considerations.
 
 > [!danger]
-> This is a danger alert.
+> Danger callouts highlight critical information that requires attention.
+
+> [!example]
+> Examples demonstrate concepts in practice.
+
+> [!quote]
+> "The best way to predict the future is to create it." — Peter Drucker
+
+## Code
+
+### Inline Code
+Use `git status` to check the state of your repository.
+
+### Code Blocks
+
+```ruby
+class ObsidianTheme
+  def initialize(name)
+    @name = name
+    @features = []
+  end
+
+  def add_feature(feature)
+    @features << feature
+    puts "Added #{feature} to #{@name}"
+  end
+end
+```
+
+```css
+.obsidian-theme {
+  --bg-primary: #202225;
+  --text-normal: #dcddde;
+  --accent: #7c3aed;
+
+  display: grid;
+  grid-template-columns: 260px 1fr 280px;
+  height: 100vh;
+}
+```
+
+## Tables
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Wikilinks | Done | [[note-name]] syntax |
+| Backlinks | Done | Auto-generated |
+| Search | Done | Ctrl+K command palette |
+| Graph view | Done | Vis.js network |
+| Tags | Done | Inline tag support |
+| Callouts | Done | Obsidian-style |
+
+## Images
+
+Images work with standard markdown syntax:
+
+```markdown
+![Alt text](/path/to/image.png)
+```
+
+## Horizontal Rules
+
+---
 
 ## Tags
 
-Use `#hashtags` inline: #markdown #syntax #guide
+This note is tagged with: #guide #markdown #syntax
 
-## Code Blocks
-
-```python
-def hello():
-    print("Hello, World!")
-```
-
-## LaTeX Math
-
-Inline: $E = mc^2$
-
-Block:
-$$
-\sum_{i=1}^{n} i = \frac{n(n+1)}{2}
-$$
-
-## See Also
-
-- [[guides/getting-started|Getting Started]]
+Check the tag pages to see all notes with these tags.

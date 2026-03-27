@@ -1,22 +1,60 @@
 ---
 title: "Evergreen Notes"
-tags: [concepts, knowledge-management]
+tags: [concepts, method, knowledge-management]
 date: 2026-03-23
 ---
 
-**Evergreen notes** are notes that are continuously refined and updated over time. They are designed to accumulate insight and grow into a rich network of interconnected ideas.
+**Evergreen Notes** are a concept developed by Andy Matuschak as an evolution of the [[concepts/zettelkasten|Zettelkasten]] method.
 
-## Key Characteristics
+## What Are Evergreen Notes?
 
-- **Atomic** — One idea per note
-- **Densely linked** — Connected to other notes via [[wikilinks]]
-- **Organized for discovery** — Titles are concepts, not topics
-- **Written for your future self**
+Evergreen notes are notes that are:
+
+1. **Atomic** — One idea per note
+2. **Concept-oriented** — Organized by concept, not by source
+3. **Densely linked** — Connected to many other notes
+4. **Written for yourself** — In your own words
 
 > [!note]
-> Evergreen notes are the building blocks of a personal knowledge base.
+> The term "evergreen" comes from the idea that these notes should remain relevant and valuable over time, like evergreen trees that keep their leaves year-round.
 
-### See Also
+## Key Principles
 
-- [[concepts/zettelkasten|Zettelkasten]]
-- [[guides/getting-started|Getting Started]]
+### Prefer Associative Ontology
+
+Don't organize notes by topic or category. Instead, link them based on how ideas relate to each other.
+
+### Titles Are First-Class
+
+The title of an evergreen note should be a complete thought, not just a label:
+
+- Good: "Spaced repetition enhances long-term retention"
+- Bad: "Spaced repetition"
+
+### Create Notes Over Time
+
+Evergreen notes should evolve. As you learn more, revisit and refine your notes.
+
+## How This Vault Supports Evergreen Notes
+
+- **Wikilinks** — Connect notes with `[[note-name]]` syntax
+- **Backlinks** — See which notes reference the current one
+- **Graph view** — Visualize your knowledge network
+- **Tags** — Categorize notes with `#hashtag`
+
+### Related
+
+- [[concepts/zettelkasten|Zettelkasten]] — The original slip-box method
+- [[guides/markdown-features|Markdown Features]] — Formatting options
+- [[guides/getting-started|Getting Started]] — Vault setup guide
+
+## Example
+
+Here's an example of an evergreen note about spaced repetition:
+
+> [!tip]
+> Write evergreen notes as if you're explaining the concept to your future self. Be clear, concise, and use your own words.
+
+---
+
+*This note is part of the [[concepts/index|Concepts]] collection.*

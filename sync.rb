@@ -5,13 +5,14 @@
 # Syncs a local Obsidian vault into the _notes/ directory
 #
 # Usage:
-#   ruby sync.rb [command] [vault_path] [options]
-#
-# Commands:
-#   sync      Sync vault to _notes/ (default)
-#   watch     Continuous sync (polls for changes)
-#   status    Show new/modified/deleted files
-#   setup     Install demo notes (when no vault configured)
+#   ruby sync.rb                        # Sync using vault_path from _config.yml
+#   ruby sync.rb sync                   # Same as above
+#   ruby sync.rb /path/to/vault         # Override vault path
+#   ruby sync.rb sync /path/to/vault    # Same as above
+#   ruby sync.rb watch                  # Continuous sync (polls every 2s)
+#   ruby sync.rb watch /path/to/vault   # Watch with override path
+#   ruby sync.rb status                 # Show sync status
+#   ruby sync.rb status /path/to/vault  # Status with override path
 
 require "fileutils"
 require "yaml"
@@ -63,7 +64,7 @@ module ObsidianSync
       obsidian = config.dig("obsidian") || {}
       sync = obsidian["sync"] || {}
 
-      @vault_path = File.expand_path(sync["vault_path"]) if sync["vault_path"] && !sync["vault_path"].empty?
+      @vault_path = File.expand_path(sync["vault_path"]) if sync["vault_path"]
       @notes_dir = sync["notes_dir"] || @notes_dir
       @attachments_dir = sync["attachments_dir"] || @attachments_dir
       @auto_frontmatter = sync.key?("auto_frontmatter") ? sync["auto_frontmatter"] : @auto_frontmatter
@@ -108,6 +109,10 @@ module ObsidianSync
       File.write(STATE_FILE, JSON.pretty_generate(@data))
     end
 
+    def clear!
+      @data = { "files" => {}, "last_sync" => nil }
+    end
+
     private
 
     def load
@@ -134,8 +139,8 @@ module ObsidianSync
       validate_vault!
 
       puts "\e[36mObsidian Sync\e[0m"
-      puts "  Vault:       #{@config.vault_path}"
-      puts "  Notes:       #{@config.notes_dir}/"
+      puts "  Vault:      #{@config.vault_path}"
+      puts "  Notes:      #{@config.notes_dir}/"
       puts "  Attachments: #{@config.attachments_dir}/"
       puts ""
 
@@ -224,6 +229,17 @@ module ObsidianSync
       puts "\n\e[36mWatch stopped.\e[0m"
     end
 
+    def print_summary
+      puts ""
+      puts "  \e[32mSync complete:\e[0m"
+      puts "    Notes synced:    #{@stats[:synced]}"
+      puts "    Attachments:     #{@stats[:attachments]}"
+      puts "    Skipped:         #{@stats[:skipped]}"
+      puts "    Cleaned:         #{@stats[:cleaned]}" if @stats[:cleaned] > 0
+      puts "    Errors:          #{@stats[:errors]}" if @stats[:errors] > 0
+      puts ""
+    end
+
     def install_demo_notes
       unless File.directory?(DEMO_DIR)
         puts "\e[33mNo demo notes found at #{DEMO_DIR}/\e[0m"
@@ -273,7 +289,9 @@ module ObsidianSync
       Find.find(@config.vault_path) do |path|
         if File.directory?(path)
           basename = File.basename(path)
-          Find.prune if @config.ignore_patterns.include?(basename)
+          if @config.ignore_patterns.include?(basename)
+            Find.prune
+          end
           next
         end
 
@@ -292,7 +310,9 @@ module ObsidianSync
       Find.find(@config.vault_path) do |path|
         if File.directory?(path)
           basename = File.basename(path)
-          Find.prune if @config.ignore_patterns.include?(basename)
+          if @config.ignore_patterns.include?(basename)
+            Find.prune
+          end
           next
         end
 
@@ -351,6 +371,7 @@ module ObsidianSync
     end
 
     def clean_orphans
+      # Collect all vault note paths
       vault_notes = Set.new
       Find.find(@config.vault_path) do |path|
         if File.directory?(path)
@@ -363,24 +384,28 @@ module ObsidianSync
         vault_notes << relative if relative
       end
 
+      # Scan _notes/ and remove anything not in vault
       notes_dir = @config.notes_dir
-      if File.directory?(notes_dir)
-        Find.find(notes_dir) do |path|
-          next if File.directory?(path)
-          relative = path.sub("#{notes_dir}/", "")
-          next unless File.extname(path).downcase == MARKDOWN_EXTENSION
+      return unless File.directory?(notes_dir)
 
-          unless vault_notes.include?(relative)
-            File.delete(path)
-            @stats[:cleaned] += 1
-            @state.remove_file(relative)
-          end
-        end
-        Dir.glob(File.join(notes_dir, "**", "*")).reverse_each do |dir|
-          Dir.rmdir(dir) if File.directory?(dir) && Dir.empty?(dir)
+      Find.find(notes_dir) do |path|
+        next if File.directory?(path)
+        relative = path.sub("#{notes_dir}/", "")
+        next unless File.extname(path).downcase == MARKDOWN_EXTENSION
+
+        unless vault_notes.include?(relative)
+          File.delete(path)
+          @stats[:cleaned] += 1
+          @state.remove_file(relative)
         end
       end
 
+      # Clean empty directories
+      Dir.glob(File.join(notes_dir, "**", "*")).reverse_each do |dir|
+        Dir.rmdir(dir) if File.directory?(dir) && Dir.empty?(dir)
+      end
+
+      # Clean orphaned attachments
       vault_attachments = Set.new
       Find.find(@config.vault_path) do |path|
         if File.directory?(path)
@@ -433,12 +458,17 @@ module ObsidianSync
       @state.save
     end
 
+    # ── Front Matter Normalization ──────────────────────────
+
     def normalize_frontmatter(content, source_path, relative_path)
       return content unless @config.auto_frontmatter
 
       if content.match?(/\A---\s*\n/)
+        # Has front matter — ensure title and date exist
         parts = content.split(/\A---\s*\n/, 2)
-        return content if parts.length < 2
+        if parts.length < 2
+          return generate_default_frontmatter(relative_path) + content
+        end
 
         yaml_part, rest = parts[1].split(/\n---\s*\n/, 2)
         return content unless rest
@@ -467,6 +497,7 @@ module ObsidianSync
           content
         end
       else
+        # No front matter — generate default
         generate_default_frontmatter(relative_path) + content
       end
     end
@@ -490,6 +521,8 @@ module ObsidianSync
       basename.gsub(/[-_]/, " ").split.map(&:capitalize).join(" ")
     end
 
+    # ── Helpers ─────────────────────────────────────────────
+
     def relative_vault_path(full_path)
       relative = full_path.sub(@config.vault_path + "/", "")
       return nil if relative == full_path
@@ -501,21 +534,13 @@ module ObsidianSync
     rescue StandardError
       nil
     end
-
-    def print_summary
-      puts ""
-      puts "  \e[32mSync complete:\e[0m"
-      puts "    Notes synced:    #{@stats[:synced]}"
-      puts "    Attachments:     #{@stats[:attachments]}"
-      puts "    Skipped:         #{@stats[:skipped]}"
-      puts "    Cleaned:         #{@stats[:cleaned]}" if @stats[:cleaned] > 0
-      puts "    Errors:          #{@stats[:errors]}" if @stats[:errors] > 0
-      puts ""
-    end
   end
 end
 
+# ── CLI Entry Point ──────────────────────────────────────────
+
 if __FILE__ == $PROGRAM_NAME
+  # Show help
   if ARGV.include?("--help") || ARGV.include?("-h")
     puts <<~HELP
       Obsidian Vault Sync for Jekyll
@@ -539,22 +564,25 @@ if __FILE__ == $PROGRAM_NAME
         ruby sync.rb watch                   # Watch mode with config vault path
         ruby sync.rb watch /path/to/vault    # Watch mode with explicit path
         ruby sync.rb status                  # Show sync status
-        ruby sync.rb setup                   # Install demo notes
     HELP
     exit 0
   end
 
   config = ObsidianSync::Config.new
 
+  # Parse command and optional vault path from args
   command = "sync"
   args = ARGV.dup
 
+  # Extract command if first arg is a known command
   if %w[sync watch status setup].include?(args[0])
     command = args.shift
   end
 
+  # Remaining args: first non-flag is vault path
   vault_override = args.find { |a| !a.start_with?("-") }
 
+  # Watch interval option
   interval = 2
   if idx = args.index("--interval")
     interval = (args[idx + 1] || 2).to_i
