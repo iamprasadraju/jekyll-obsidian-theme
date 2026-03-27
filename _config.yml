@@ -90,6 +90,15 @@ obsidian:
     colorful_headings: true
     image_grid: true
     cards: true
+  # Vault sync
+  sync:
+    vault_path: ""  # Path to your Obsidian vault (e.g. "~/Documents/MyVault")
+    attachments_dir: "assets/attachments"
+    ignore: []      # Extra dirs/files to skip (beyond .obsidian, .trash, .git)
+    auto_frontmatter: true  # Auto-add title/date if missing
+    incremental: true       # Only sync changed files
+    orphan_cleanup: true    # Remove notes from _notes/ that no longer exist in vault
+
   # Optional features
   mermaid: false
   mathjax: false

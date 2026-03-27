@@ -18,3 +18,9 @@ Thumbs.db
 
 # Node (if used)
 node_modules/
+
+# Obsidian sync
+.sync-state.json
+
+# Synced attachments (uncomment to exclude from git)
+# assets/attachments/

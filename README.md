@@ -18,6 +18,7 @@ A Jekyll theme that replicates the look, feel, and workflow of the [Obsidian](ht
 - **Code blocks** — syntax highlighting with copy button
 - **Responsive** — sidebars collapse to drawers on mobile
 - **Keyboard shortcuts** — `Ctrl+K` search, `Ctrl+B` toggle sidebar, `Esc` close modals
+- **Vault sync** — `ruby sync.rb` copies your local Obsidian vault into `_notes/`
 
 ## Quick Start
 
@@ -45,12 +46,87 @@ bundle exec jekyll build
 
 Visit `http://localhost:4000` to see your vault.
 
+## Syncing Your Obsidian Vault
+
+The `sync.rb` script copies your local Obsidian vault into the Jekyll project. No Obsidian plugin required.
+
+### Quick Setup
+
+1. Set your vault path in `_config.yml`:
+
+```yaml
+obsidian:
+  sync:
+    vault_path: "~/Documents/MyVault"
+```
+
+2. Run the sync:
+
+```bash
+ruby sync.rb
+```
+
+### Commands
+
+```bash
+ruby sync.rb                        # Sync (reads vault path from _config.yml)
+ruby sync.rb /path/to/vault         # Sync with explicit vault path
+ruby sync.rb sync                   # Same as default
+ruby sync.rb watch                  # Continuous sync (polls every 2s)
+ruby sync.rb watch --interval 5     # Custom polling interval
+ruby sync.rb status                 # Show new/modified/deleted files
+ruby sync.rb status /path/to/vault  # Status with explicit path
+```
+
+### Full Workflow
+
+```bash
+# First time: configure vault path in _config.yml, then:
+ruby sync.rb && bundle exec jekyll serve --livereload
+
+# Development with auto-sync:
+ruby sync.rb watch &                # Background watch
+bundle exec jekyll serve --livereload
+```
+
+### What Gets Synced
+
+| Type | Source | Destination |
+|------|--------|-------------|
+| Notes | `vault/**/*.md` | `_notes/` |
+| Attachments | `vault/**/*.png,jpg,gif,pdf,...` | `assets/attachments/` |
+| Front matter | Auto-generated if missing | Adds `title`, `date`, `tags` |
+
+### Configuration Options
+
+```yaml
+obsidian:
+  sync:
+    vault_path: "~/Documents/MyVault"    # Required: path to your vault
+    attachments_dir: "assets/attachments" # Where to copy images/PDFs
+    ignore:                               # Extra dirs to skip
+      - ".git"
+      - "templates"
+    auto_frontmatter: true                # Add title/date if missing
+    incremental: true                     # Only sync changed files
+    orphan_cleanup: true                  # Remove notes no longer in vault
+```
+
+### How It Works
+
+- **Incremental sync** — MD5 hash comparison, only copies changed files
+- **Front matter normalization** — Missing `title` derived from filename, `date` from file mtime
+- **Orphan cleanup** — Removes notes from `_notes/` that no longer exist in the vault
+- **Obsidian exclusions** — Automatically skips `.obsidian/`, `.trash/`, `.git/`
+- **Watch mode** — Poll-based (no external gems needed), syncs on file changes
+
 ## Directory Structure
 
 ```
 obsidian-theme/
 ├── _config.yml              # Site configuration
 ├── Gemfile                   # Ruby dependencies
+├── sync.rb                   # Obsidian vault sync script
 ├── _layouts/                 # Page layouts
 │   ├── default.html          # App shell (3-column)
 │   ├── note.html             # Single note with backlinks
