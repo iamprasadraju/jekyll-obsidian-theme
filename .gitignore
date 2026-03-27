@@ -22,5 +22,6 @@ node_modules/
 # Obsidian sync
 .sync-state.json
 
-# Synced attachments (uncomment to exclude from git)
-# assets/attachments/
+# User's synced notes (private content - excluded from open source repo)
+_notes/
+assets/attachments/

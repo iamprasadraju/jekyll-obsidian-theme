@@ -48,7 +48,7 @@ obsidian:
     enabled: true
     lazy_load: true
     mini_graph: true
-    test_nodes: 300  # Set to 0 to disable fake test nodes
+    test_nodes: 0  # Set to >0 to add fake test nodes for graph performance testing
   # Slide overlay (Andy Matuschak style)
   slides:
     enabled: true
@@ -101,7 +101,7 @@ obsidian:
 
   # Optional features
   mermaid: false
-  mathjax: false
+  mathjax: true
 
 # Markdown processing
 kramdown:

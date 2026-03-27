@@ -19,6 +19,7 @@ require "yaml"
 require "json"
 require "digest"
 require "find"
+require "set"
 require "optparse"
 
 module ObsidianSync
@@ -126,6 +127,8 @@ module ObsidianSync
   end
 
   class Syncer
+    DEMO_DIR = "_demo"
+
     def initialize(config)
       @config = config
       @state = State.new
@@ -224,6 +227,42 @@ module ObsidianSync
       end
     rescue Interrupt
       puts "\n\e[36mWatch stopped.\e[0m"
+    end
+
+    def print_summary
+      puts ""
+      puts "  \e[32mSync complete:\e[0m"
+      puts "    Notes synced:    #{@stats[:synced]}"
+      puts "    Attachments:     #{@stats[:attachments]}"
+      puts "    Skipped:         #{@stats[:skipped]}"
+      puts "    Cleaned:         #{@stats[:cleaned]}" if @stats[:cleaned] > 0
+      puts "    Errors:          #{@stats[:errors]}" if @stats[:errors] > 0
+      puts ""
+    end
+
+    def install_demo_notes
+      unless File.directory?(DEMO_DIR)
+        puts "\e[33mNo demo notes found at #{DEMO_DIR}/\e[0m"
+        return
+      end
+
+      ensure_directories
+      count = 0
+
+      Find.find(DEMO_DIR) do |path|
+        next if File.directory?(path)
+
+        relative = path.sub("#{DEMO_DIR}/", "")
+        dest = File.join(@config.notes_dir, relative)
+        FileUtils.mkdir_p(File.dirname(dest))
+        FileUtils.cp(path, dest)
+        count += 1
+      end
+
+      puts "\e[36mDemo Notes Installed\e[0m"
+      puts "  Copied #{count} files from #{DEMO_DIR}/ to #{@config.notes_dir}/"
+      puts "  Run \e[33mruby sync.rb /path/to/vault\e[0m to replace with your vault notes."
+      puts ""
     end
 
     private
@@ -332,31 +371,68 @@ module ObsidianSync
     end
 
     def clean_orphans
-      synced_notes = @state.synced_files.select { |f| !f.start_with?("att:") }
-      synced_notes.each do |relative_path|
-        vault_source = File.join(@config.vault_path, relative_path)
-        next if File.exist?(vault_source)
-
-        note_dest = File.join(@config.notes_dir, relative_path)
-        if File.exist?(note_dest)
-          File.delete(note_dest)
-          @stats[:cleaned] += 1
+      # Collect all vault note paths
+      vault_notes = Set.new
+      Find.find(@config.vault_path) do |path|
+        if File.directory?(path)
+          basename = File.basename(path)
+          Find.prune if @config.ignore_patterns.include?(basename)
+          next
         end
-        @state.remove_file(relative_path)
+        next unless File.extname(path).downcase == MARKDOWN_EXTENSION
+        relative = relative_vault_path(path)
+        vault_notes << relative if relative
       end
 
-      synced_attachments = @state.synced_files.select { |f| f.start_with?("att:") }
-      synced_attachments.each do |key|
-        relative_path = key.sub("att:", "")
-        vault_source = File.join(@config.vault_path, relative_path)
-        next if File.exist?(vault_source)
+      # Scan _notes/ and remove anything not in vault
+      notes_dir = @config.notes_dir
+      return unless File.directory?(notes_dir)
 
-        att_dest = File.join(@config.attachments_dir, relative_path)
-        if File.exist?(att_dest)
-          File.delete(att_dest)
+      Find.find(notes_dir) do |path|
+        next if File.directory?(path)
+        relative = path.sub("#{notes_dir}/", "")
+        next unless File.extname(path).downcase == MARKDOWN_EXTENSION
+
+        unless vault_notes.include?(relative)
+          File.delete(path)
           @stats[:cleaned] += 1
+          @state.remove_file(relative)
         end
-        @state.remove_file(key)
+      end
+
+      # Clean empty directories
+      Dir.glob(File.join(notes_dir, "**", "*")).reverse_each do |dir|
+        Dir.rmdir(dir) if File.directory?(dir) && Dir.empty?(dir)
+      end
+
+      # Clean orphaned attachments
+      vault_attachments = Set.new
+      Find.find(@config.vault_path) do |path|
+        if File.directory?(path)
+          basename = File.basename(path)
+          Find.prune if @config.ignore_patterns.include?(basename)
+          next
+        end
+        next if File.extname(path).downcase == MARKDOWN_EXTENSION
+        relative = relative_vault_path(path)
+        next unless relative && @config.attachment_extensions.include?(File.extname(path).downcase.sub(".", ""))
+        vault_attachments << relative
+      end
+
+      att_dir = @config.attachments_dir
+      if File.directory?(att_dir)
+        Find.find(att_dir) do |path|
+          next if File.directory?(path)
+          relative = path.sub("#{att_dir}/", "")
+          unless vault_attachments.include?(relative)
+            File.delete(path)
+            @stats[:cleaned] += 1
+            @state.remove_file("att:#{relative}")
+          end
+        end
+        Dir.glob(File.join(att_dir, "**", "*")).reverse_each do |dir|
+          Dir.rmdir(dir) if File.directory?(dir) && Dir.empty?(dir)
+        end
       end
     end
 
@@ -458,17 +534,6 @@ module ObsidianSync
     rescue StandardError
       nil
     end
-
-    def print_summary
-      puts ""
-      puts "  \e[32mSync complete:\e[0m"
-      puts "    Notes synced:    #{@stats[:synced]}"
-      puts "    Attachments:     #{@stats[:attachments]}"
-      puts "    Skipped:         #{@stats[:skipped]}"
-      puts "    Cleaned:         #{@stats[:cleaned]}" if @stats[:cleaned] > 0
-      puts "    Errors:          #{@stats[:errors]}" if @stats[:errors] > 0
-      puts ""
-    end
   end
 end
 
@@ -487,6 +552,7 @@ if __FILE__ == $PROGRAM_NAME
         sync      Sync vault to _notes/ (default)
         watch     Continuous sync (polls for changes)
         status    Show new/modified/deleted files
+        setup     Install demo notes (when no vault configured)
 
       Options:
         --interval N  Polling interval in seconds (default: 2)
@@ -509,7 +575,7 @@ if __FILE__ == $PROGRAM_NAME
   args = ARGV.dup
 
   # Extract command if first arg is a known command
-  if %w[sync watch status].include?(args[0])
+  if %w[sync watch status setup].include?(args[0])
     command = args.shift
   end
 
@@ -533,9 +599,11 @@ if __FILE__ == $PROGRAM_NAME
     syncer.watch(interval)
   when "status"
     syncer.status
+  when "setup"
+    syncer.install_demo_notes
   else
     $stderr.puts "Unknown command: #{command}"
-    $stderr.puts "Usage: ruby sync.rb [sync|watch|status] [vault_path] [--interval N]"
+    $stderr.puts "Usage: ruby sync.rb [sync|watch|status|setup] [vault_path] [--interval N]"
     exit 1
   end
 end
