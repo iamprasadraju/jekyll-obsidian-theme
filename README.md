@@ -13,12 +13,13 @@
 
   <br>
 
-  [Features](#-features) &bull;
-  [Installation](#-installation) &bull;
-  [Sync Your Vault](#-sync-your-obsidian-vault) &bull;
-  [Configuration](#-configuration) &bull;
-  [Customization](#-customization) &bull;
-  [Deployment](#-deployment)
+  [Features](#features) &bull;
+  [Getting Started](#getting-started) &bull;
+  [Stay Updated](#stay-updated-with-upstream) &bull;
+  [Sync Your Vault](#sync-your-obsidian-vault) &bull;
+  [Configuration](#configuration) &bull;
+  [Customization](#customization) &bull;
+  [Deployment](#deployment)
 
 </div>
 
@@ -75,30 +76,111 @@
 
 ---
 
-## Installation
+## Getting Started
 
-### Prerequisites
+### 1. Create Your Repository
 
-- [Ruby](https://www.ruby-lang.org/) >= 3.0
-- [Bundler](https://bundler.io/)
-- [Jekyll](https://jekyllrb.com/) >= 4.3
+Go to the [jekyll-obsidian-theme](https://github.com/iamprasadraju/jekyll-obsidian-theme) repo and click **"Use this template"** → **"Create a new repository"**.
 
-### Quick Start
+This creates your own copy. All your notes stay in your repo — they're never pushed to the upstream theme.
+
+### 2. Clone and Install
 
 ```bash
-# Clone the repository
-git clone https://github.com/iamprasadraju/jekyll-obsidian-theme.git
-cd jekyll-obsidian-theme
+# Clone your new repository
+git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
+cd YOUR_REPO
 
 # Install dependencies
 bundle install
+```
 
-# Install demo notes and start the dev server
+### 3. Configure Your Site
+
+Edit `_config.yml`:
+
+```yaml
+title: "My Vault"                          # Your site title
+baseurl: ""                                # Root path (e.g. "/blog" for subfolder)
+url: "https://yourusername.github.io"      # Your site URL
+```
+
+### 4. Add Your Notes
+
+**Option A — Sync from your Obsidian vault:**
+
+```yaml
+# In _config.yml
+obsidian:
+  sync:
+    vault_path: "~/Documents/MyVault"
+```
+
+```bash
+ruby sync.rb
+```
+
+**Option B — Install demo notes to explore the theme:**
+
+```bash
 ruby sync.rb setup
+```
+
+### 5. Run Locally
+
+```bash
 bundle exec jekyll serve --livereload
 ```
 
 Open [http://localhost:4000](http://localhost:4000) to see your site.
+
+### 6. Deploy
+
+Push to GitHub. The included `.github/workflows/pages.yml` builds and deploys automatically on push to `main`. Go to your repo's **Settings → Pages** and set the source to **GitHub Actions**.
+
+---
+
+## Stay Updated with Upstream
+
+Your notes are safe. `_notes/` and `assets/attachments/` are in `.gitignore`, so upstream updates never touch your content.
+
+### Add the Upstream Remote (one time)
+
+```bash
+git remote add upstream https://github.com/iamprasadraju/jekyll-obsidian-theme.git
+```
+
+### Pull Updates
+
+```bash
+git fetch upstream
+git merge upstream/main
+```
+
+### What Gets Updated
+
+| Updated (theme files) | Untouched (your content) |
+|-----------------------|--------------------------|
+| `_layouts/` | `_notes/` |
+| `_includes/` | `assets/attachments/` |
+| `_sass/` | `_site/` |
+| `_plugins/` | `.jekyll-cache/` |
+| `assets/js/` | |
+| `Gemfile` | |
+
+### Merge Conflicts
+
+If you edited `_config.yml` or `index.md`, you may get merge conflicts. Resolve them manually:
+
+```bash
+# After merge, check for conflicts
+git status
+
+# Edit conflicted files, then
+git add . && git commit -m "Resolve upstream merge"
+```
+
+To avoid conflicts with `_config.yml`, keep your site-specific settings (title, url, baseurl) at the top and don't modify the `obsidian:` block unless you know what changed upstream.
 
 ---
 
