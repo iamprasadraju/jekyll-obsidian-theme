@@ -43,7 +43,11 @@
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
   --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
 
-  --bg-code: #f6f8fa;
+  --bg-code: #f0f0f0;
+  --inline-code-bg: #e8e8e8;
+  --code-bg: #fafafa;
+  --code-header-bg: #fafafa;
+  --code-border: #e0e0e0;
 
   --tag-bg: rgba(124, 58, 237, 0.1);
   --tag-text: #6d28d9;
@@ -85,6 +89,18 @@
   --text-selection: var(--hl1);
 
   --cards-background: transparent;
+
+  // Vim Light code colors
+  --code-text: #000000;
+  --code-comment: #008000;
+  --code-keyword: #0000ff;
+  --code-string: #a31515;
+  --code-number: #098658;
+  --code-function: #795e26;
+  --code-variable: #001080;
+  --code-operator: #000000;
+  --code-constant: #0070c1;
+  --code-class: #267f99;
 }
 
 // Light theme semantic aliases

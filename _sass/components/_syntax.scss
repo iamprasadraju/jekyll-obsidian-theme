@@ -1,10 +1,10 @@
-// Syntax highlighting - Catppuccin Mocha on Obsidian base
+// Syntax highlighting - Vim style
 
 .highlight,
 pre.highlight,
 div.highlighter-rouge,
 figure.highlight {
-  background: var(--bg-code) !important;
+  background: var(--code-bg) !important;
   color: var(--code-text) !important;
   border-radius: var(--radius);
   overflow: auto;
@@ -12,17 +12,26 @@ figure.highlight {
   border: none;
   position: relative;
 
+  pre {
+    margin: 0;
+    padding: var(--sp-4);
+    border: none;
+    border-radius: 0;
+    background: transparent !important;
+  }
+
   // Copy button
   .copy-btn {
     position: absolute;
     top: var(--sp-2);
     right: var(--sp-2);
-    padding: var(--sp-1) var(--sp-2);
-    background: var(--background-tertiary);
-    border: var(--border-width) solid var(--border);
+    padding: 4px 8px;
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
     border-radius: var(--radius-sm);
     color: var(--text-muted);
-    font-size: var(--font-size-xs);
+    font-size: 12px;
+    font-family: var(--font-sans);
     opacity: 0;
     transition: all var(--transition-fast);
     cursor: pointer;
@@ -53,7 +62,7 @@ pre,
 .highlight {
   .language-label {
     position: absolute;
-    top: 0;
+    top: var(--sp-2);
     right: 0;
     padding: var(--sp-1) var(--sp-3);
     font-size: var(--font-size-xs);
@@ -64,7 +73,7 @@ pre,
   }
 }
 
-// Token colors - Catppuccin Mocha
+// Vim style token colors
 .highlight {
   .c,
   .c1,
@@ -112,7 +121,6 @@ pre,
   }
 
   .n,
-  .na,
   .nb,
   .nc,
   .nd,
@@ -126,6 +134,10 @@ pre,
   .vg,
   .vi {
     color: var(--code-variable);
+  }
+
+  .na {
+    color: var(--code-class);
   }
 
   .o,

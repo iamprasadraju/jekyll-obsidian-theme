@@ -87,7 +87,7 @@ code {
   font-family: var(--font-mono);
   font-size: 0.85em;
   padding: 0.15em 0.4em;
-  background: var(--bg-code);
+  background: var(--inline-code-bg, var(--bg-code));
   border-radius: var(--radius-sm);
   color: var(--text-code);
 }
@@ -102,7 +102,7 @@ th > code {
 pre {
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
-  background: var(--bg-code);
+  background: var(--code-bg);
   border-radius: var(--radius);
   padding: var(--sp-4);
   overflow-x: auto;
