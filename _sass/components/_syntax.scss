@@ -1,4 +1,4 @@
-// Syntax highlighting - Catppuccin Mocha on Minimal Publish base
+// Syntax highlighting - Catppuccin Mocha on Obsidian base
 
 .highlight,
 pre.highlight,
@@ -9,7 +9,7 @@ figure.highlight {
   border-radius: var(--radius);
   overflow: auto;
   margin-bottom: var(--sp-4);
-  border: var(--border-width) solid var(--border);
+  border: none;
   position: relative;
 
   // Copy button

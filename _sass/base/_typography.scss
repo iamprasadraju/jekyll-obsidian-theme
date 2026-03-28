@@ -101,14 +101,15 @@ pre {
   padding: var(--sp-4);
   overflow-x: auto;
   margin-bottom: var(--sp-4);
-  border: var(--border-width) solid var(--border);
-  line-height: 1.45;
+  border: none;
+  line-height: 1.5;
 
   code {
     padding: 0;
     background: none;
     border-radius: 0;
     font-size: inherit;
+    color: inherit;
   }
 }
 
@@ -128,33 +129,34 @@ hr {
   margin: var(--sp-8) 0;
 }
 
-// Tables - Minimal Publish style (borderless by default)
+// Tables - Obsidian style
 table {
   width: 100%;
   border-collapse: collapse;
-  border: var(--border-width) solid var(--border-color, var(--border));
+  border: none;
   margin-block-start: 1em;
   margin-bottom: var(--sp-4);
+  font-size: var(--font-size-sm);
 
   th,
   td {
-    padding: var(--table-cell-padding);
+    padding: 6px 13px;
     text-align: left;
-
-    &:first-child {
-      padding-left: var(--table-edge-cell-padding-first);
-    }
-
-    &:last-child {
-      padding-right: var(--table-edge-cell-padding-last);
-    }
+    border: 1px solid var(--border);
   }
 
   th {
     font-weight: var(--bold-weight);
-    font-size: var(--table-header-size, inherit);
-    border-bottom: var(--table-header-border-width, 0)
-      solid var(--border-color, var(--border));
+    background: var(--background-secondary);
+    border-bottom-width: 2px;
+  }
+
+  tr {
+    background: var(--background-primary);
+
+    &:nth-child(2n) {
+      background: var(--background-secondary);
+    }
   }
 }
 
