@@ -192,9 +192,41 @@
   border-bottom: 1px solid var(--border);
   background: var(--background-primary);
   gap: var(--sp-2);
+  overflow: hidden;
 
   @media (max-width: 1024px) {
     display: flex;
+  }
+
+  .header-breadcrumb {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .header-actions {
+    flex-shrink: 0;
+    gap: 0;
+
+    .header-btn {
+      width: 36px;
+      height: 36px;
+    }
+  }
+
+  @media (max-width: 380px) {
+    padding: 0 var(--sp-2);
+    gap: var(--sp-1);
+
+    .header-actions .header-btn {
+      width: 32px;
+      height: 32px;
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
   }
 }
 

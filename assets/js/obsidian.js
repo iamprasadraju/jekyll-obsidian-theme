@@ -19,12 +19,16 @@
   }
 
   function updateThemeUI(theme) {
-    var sunIcon = document.querySelector(".icon-sun")
-    var moonIcon = document.querySelector(".icon-moon")
+    var sunIcons = document.querySelectorAll(".icon-sun")
+    var moonIcons = document.querySelectorAll(".icon-moon")
     var label = document.querySelector(".theme-label")
 
-    if (sunIcon) sunIcon.style.display = theme === "dark" ? "block" : "none"
-    if (moonIcon) moonIcon.style.display = theme === "dark" ? "none" : "block"
+    sunIcons.forEach(function (icon) {
+      icon.style.display = theme === "dark" ? "block" : "none"
+    })
+    moonIcons.forEach(function (icon) {
+      icon.style.display = theme === "dark" ? "none" : "block"
+    })
     if (label) label.textContent = theme === "dark" ? "Light" : "Dark"
   }
 
