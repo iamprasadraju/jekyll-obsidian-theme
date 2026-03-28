@@ -92,6 +92,12 @@ code {
   color: var(--text-code);
 }
 
+// Inline code in tables should not add extra background
+td > code,
+th > code {
+  padding: 0.1em 0.3em;
+}
+
 // Code blocks
 pre {
   font-family: var(--font-mono);

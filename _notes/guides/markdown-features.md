@@ -52,6 +52,15 @@ $$
 \sum_{i=1}^{n} i = \frac{n(n+1)}{2}
 $$
 
+## Tables
+
+| Expression | Equivalent to |
+|---|---|
+| `y += x;` | `y = y + x;` |
+| `x -= 5;` | `x = x - 5;` |
+| `x /= y;` | `x = x / y;` |
+| `price *= units + 1;` | `price = price * (units+1);` |
+
 ## See Also
 
 - [[guides/getting-started|Getting Started]]
