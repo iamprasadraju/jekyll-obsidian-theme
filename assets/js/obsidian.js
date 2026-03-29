@@ -441,6 +441,8 @@
             y: startY,
             fx: startX,
             fy: startY,
+            _startX: startX,
+            _startY: startY,
             targetX: targetX,
             targetY: targetY,
             hoverOpacity: 1,

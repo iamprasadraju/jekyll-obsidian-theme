@@ -40,7 +40,7 @@ module ObsidianSync
     def initialize(config_path = "_config.yml")
       @notes_dir = "_notes"
       @attachments_dir = "assets/attachments"
-      @ignore_patterns = [".obsidian", ".trash", ".git"]
+      @ignore_patterns = [".obsidian", ".trash", ".git", "_notes", "_site", "_demo"]
       @auto_frontmatter = true
       @incremental = true
       @orphan_cleanup = true
@@ -64,7 +64,7 @@ module ObsidianSync
       obsidian = config.dig("obsidian") || {}
       sync = obsidian["sync"] || {}
 
-      @vault_path = File.expand_path(sync["vault_path"]) if sync["vault_path"]
+      @vault_path = File.expand_path(sync["vault_path"]) if sync["vault_path"] && !sync["vault_path"].empty?
       @notes_dir = sync["notes_dir"] || @notes_dir
       @attachments_dir = sync["attachments_dir"] || @attachments_dir
       @auto_frontmatter = sync.key?("auto_frontmatter") ? sync["auto_frontmatter"] : @auto_frontmatter
@@ -330,6 +330,10 @@ module ObsidianSync
     end
 
     def sync_note(source_path, relative_path)
+      # Skip files that conflict with site root files
+      basename = relative_path.downcase
+      return if basename == "index.md" || basename == "readme.md"
+
       current_hash = file_hash(source_path)
 
       if @config.incremental && @state.file_hash(relative_path) == current_hash

@@ -1,11 +1,9 @@
 ---
-title: Daily Notes Template
+title: "Daily Notes Template"
 layout: daily
-tags:
-- daily
-- template
-date: '2026-03-27'
+tags: [daily, template]
 ---
+
 ## Tasks
 
 - [ ] Task 1

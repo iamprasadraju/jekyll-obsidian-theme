@@ -23,5 +23,5 @@ node_modules/
 .sync-state.json
 
 # User's synced notes (private content - excluded from open source repo)
-_notes/
 assets/attachments/
+.valutpath

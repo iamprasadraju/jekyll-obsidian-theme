@@ -501,6 +501,43 @@ module Jekyll
       # Deduplicate edges
       edges.uniq!
 
+      # ─── Folder-based edges (connect notes in same folder) ───
+      folder_groups = {}
+      site.collections.each do |name, collection|
+        collection.docs.each do |doc|
+          next unless doc.output_ext == ".html"
+          parts = doc.relative_path.sub(/^_[^\/]+\//, "").sub(/^\//, "").split("/")
+          if parts.length > 1
+            folder = parts[0..-2].join("/")
+            folder_groups[folder] ||= []
+            folder_groups[folder] << doc.url
+          end
+        end
+      end
+
+      folder_groups.each do |folder, urls|
+        folder_node_ids = urls.map { |u| node_ids[u] }.compact
+        next if folder_node_ids.length < 2
+
+        # Connect index pages to siblings, or chain siblings together
+        index_url = urls.find { |u| u.end_with?("/index/") || u.end_with?("/index") }
+        if index_url && node_ids[index_url]
+          # Index page connects to all siblings
+          folder_node_ids.each do |nid|
+            next if nid == node_ids[index_url]
+            edges << { "from" => node_ids[index_url], "to" => nid }
+          end
+        else
+          # Chain siblings: 0-1, 1-2, 2-3, etc.
+          folder_node_ids.each_cons(2) do |a, b|
+            edges << { "from" => a, "to" => b }
+          end
+        end
+      end
+
+      # Deduplicate again
+      edges.uniq!
+
       # ─── Add test nodes for graph performance testing ───
       test_count = site.config.dig("obsidian", "graph", "test_nodes") || 0
       if test_count > 0
