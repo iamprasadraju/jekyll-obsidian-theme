@@ -358,13 +358,37 @@
     return adj
   }
 
+  function hashString(str) {
+    var hash = 0
+    for (var i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i)
+      hash |= 0
+    }
+    return Math.abs(hash)
+  }
+
+  function tagToColor(tag) {
+    var hash = hashString(tag)
+    var h = hash % 360
+    var s = 55 + (hash % 20)
+    var l = 55 + (hash % 15)
+    return 'hsl(' + h + ', ' + s + '%, ' + l + '%)'
+  }
+
   function getNodeColor(n, isDark) {
+    var configColorMap = {}
     for (var i = 0; i < graphColorGroups.length; i++) {
-      var group = graphColorGroups[i]
-      if (n.tags && n.tags.indexOf(group.tag) !== -1) {
-        return group.color
+      configColorMap[graphColorGroups[i].tag] = graphColorGroups[i].color
+    }
+
+    if (n.tags && n.tags.length > 0) {
+      for (var j = 0; j < n.tags.length; j++) {
+        var t = n.tags[j]
+        if (configColorMap[t]) return configColorMap[t]
+        return tagToColor(t)
       }
     }
+
     return isDark ? NODE_COLOR_DARK : NODE_COLOR_LIGHT
   }
 
@@ -705,7 +729,7 @@
         item.className = "filter-item"
         var dot = document.createElement("span")
         dot.className = "filter-color-dot"
-        dot.style.background = colorMap[tag] || NODE_COLOR_DARK
+        dot.style.background = colorMap[tag] || tagToColor(tag)
         var cb = document.createElement("input")
         cb.type = "checkbox"
         cb.checked = graphFilters.tags[tag]
@@ -816,7 +840,11 @@
         var defaultColor = isDark ? NODE_COLOR_DARK : NODE_COLOR_LIGHT
         var focusedColor = isDark ? NODE_HOVER_COLOR : NODE_HOVER_COLOR_LIGHT
         var hoverColor = isDark ? NODE_HOVER_COLOR : NODE_HOVER_COLOR_LIGHT
+        var configColorMap = {}
         var colorGroups = (data.filters && data.filters.color_groups) || []
+        for (var i = 0; i < colorGroups.length; i++) {
+          configColorMap[colorGroups[i].tag] = colorGroups[i].color
+        }
 
         var miniAdjacency = buildAdjacency(
           data.nodes.filter(function (n) { return neighborIds.has(n.id) }),
@@ -827,11 +855,9 @@
           .filter(function (n) { return neighborIds.has(n.id) && n.url.indexOf("#") !== 0 })
           .map(function (n) {
             var color = defaultColor
-            for (var i = 0; i < colorGroups.length; i++) {
-              if (n.tags && n.tags.indexOf(colorGroups[i].tag) !== -1) {
-                color = colorGroups[i].color
-                break
-              }
+            if (n.tags && n.tags.length > 0) {
+              var t = n.tags[0]
+              color = configColorMap[t] || tagToColor(t)
             }
             return {
               id: n.id,
