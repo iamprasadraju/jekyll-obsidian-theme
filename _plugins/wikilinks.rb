@@ -465,6 +465,10 @@ module Jekyll
       edges = []
       node_ids = {}
 
+      # Collect all tags and folder names for filter options
+      all_tags = Set.new
+      all_folders = Set.new
+
       site.collections.each do |name, collection|
         collection.docs.each do |doc|
           next unless doc.output_ext == ".html"
@@ -474,12 +478,20 @@ module Jekyll
 
           path_parts = doc.relative_path.split("/")
           group = path_parts.length > 2 ? path_parts[1] : "root"
+          all_folders.add(group)
+
+          # Extract tags from frontmatter
+          doc_tags = doc.data["tags"] || []
+          doc_tags = [doc_tags] if doc_tags.is_a?(String)
+          doc_tags.each { |t| all_tags.add(t) }
 
           nodes << {
             "id" => node_id,
             "label" => doc.data["title"] || doc.basename_without_ext,
             "url" => "#{site.baseurl}#{doc.url}",
-            "group" => group
+            "group" => group,
+            "tags" => doc_tags,
+            "orphan" => true
           }
         end
       end
@@ -494,6 +506,9 @@ module Jekyll
             source_id = node_ids[source_info["source"]]
             next unless source_id
             edges << { "from" => source_id, "to" => target_id }
+            # Mark nodes as non-orphans when they have connections
+            nodes[source_id]["orphan"] = false if nodes[source_id]
+            nodes[target_id]["orphan"] = false if nodes[target_id]
           end
         end
       end
@@ -526,11 +541,15 @@ module Jekyll
           folder_node_ids.each do |nid|
             next if nid == node_ids[index_url]
             edges << { "from" => node_ids[index_url], "to" => nid }
+            nodes[node_ids[index_url]]["orphan"] = false if nodes[node_ids[index_url]]
+            nodes[nid]["orphan"] = false if nodes[nid]
           end
         else
           # Chain siblings: 0-1, 1-2, 2-3, etc.
           folder_node_ids.each_cons(2) do |a, b|
             edges << { "from" => a, "to" => b }
+            nodes[a]["orphan"] = false if nodes[a]
+            nodes[b]["orphan"] = false if nodes[b]
           end
         end
       end
@@ -554,7 +573,9 @@ module Jekyll
             "id" => node_id,
             "label" => label,
             "url" => "#test-node-#{node_id}",
-            "group" => group
+            "group" => group,
+            "tags" => [group.sub('test-', '')],
+            "orphan" => false
           }
         end
 
@@ -565,6 +586,8 @@ module Jekyll
             to_id = real_node_count + rand(test_count)
             next if to_id == from_id
             edges << { "from" => from_id, "to" => to_id }
+            nodes[from_id]["orphan"] = false if nodes[from_id]
+            nodes[to_id]["orphan"] = false if nodes[to_id]
           end
         end
 
@@ -573,14 +596,34 @@ module Jekyll
           test_id = real_node_count + rand(test_count)
           real_id = rand(real_node_count)
           edges << { "from" => test_id, "to" => real_id }
+          nodes[test_id]["orphan"] = false if nodes[test_id]
+          nodes[real_id]["orphan"] = false if nodes[real_id]
         end
       end
 
       # Assign sequential edge IDs
       edges.each_with_index { |edge, i| edge["id"] = i }
 
-      graph_data = { "nodes" => nodes, "edges" => edges }
+      # Build filter metadata
+      filter_data = {
+        "tags" => all_tags.to_a.sort,
+        "folders" => all_folders.to_a.sort,
+        "color_groups" => build_color_groups(site.config, all_tags.to_a)
+      }
+
+      graph_data = { "nodes" => nodes, "edges" => edges, "filters" => filter_data }
       site.static_files << GraphDataFile.new(site, site.dest, "", "graph-data.json", graph_data)
+    end
+
+    def build_color_groups(config, tags)
+      color_groups_config = config.dig("obsidian", "graph", "color_groups") || {}
+      color_groups = []
+
+      color_groups_config.each do |tag, color|
+        color_groups << { "tag" => tag, "color" => color }
+      end
+
+      color_groups
     end
   end
 

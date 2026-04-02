@@ -19,6 +19,17 @@
       <div class="graph-view-actions">
         <button
           class="graph-view-btn"
+          id="graph-filter-btn"
+          data-action="toggle-graph-filter"
+          aria-label="Toggle filters"
+        >
+          <svg viewBox="0 0 24 24">
+            <path fill="currentColor" d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" />
+          </svg>
+          <span class="graph-btn-text">Filters</span>
+        </button>
+        <button
+          class="graph-view-btn"
           data-action="close-graph"
           aria-label="Close graph view"
         >
@@ -33,5 +44,66 @@
       </div>
     </div>
     <div class="graph-view-canvas" id="graph-canvas"></div>
+
+    <!-- Obsidian-style filter panel -->
+    <div class="graph-filter-panel" id="graph-filter-panel">
+      <div class="filter-section">
+        <div class="filter-section-header">
+          <span>Tags</span>
+          <button class="filter-reset-btn" data-action="reset-tag-filters">Reset</button>
+        </div>
+        <div class="filter-list" id="tag-filters"></div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-header">
+          <span>Folders</span>
+          <button class="filter-reset-btn" data-action="reset-folder-filters">Reset</button>
+        </div>
+        <div class="filter-list" id="folder-filters"></div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-section-header">
+          <span>Options</span>
+        </div>
+        <div class="filter-option">
+          <label class="filter-checkbox">
+            <input type="checkbox" id="show-orphans" checked />
+            <span class="filter-checkbox-label">Show orphan nodes</span>
+          </label>
+        </div>
+        <div class="filter-option">
+          <label class="filter-checkbox">
+            <input type="checkbox" id="show-labels" checked />
+            <span class="filter-checkbox-label">Show labels</span>
+          </label>
+        </div>
+        <div class="filter-option">
+          <label class="filter-range-label">
+            <span>Link depth</span>
+            <input type="range" id="link-depth" min="1" max="3" value="1" class="filter-range" />
+            <span class="filter-range-value" id="link-depth-value">1</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zoom controls -->
+    <div class="graph-zoom-controls">
+      <button class="graph-zoom-btn" data-action="zoom-in" aria-label="Zoom in">
+        <svg viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+        </svg>
+      </button>
+      <button class="graph-zoom-btn" data-action="zoom-out" aria-label="Zoom out">
+        <svg viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19 13H5v-2h14v2z" />
+        </svg>
+      </button>
+      <button class="graph-zoom-btn" data-action="zoom-fit" aria-label="Fit view">
+        <svg viewBox="0 0 24 24">
+          <path fill="currentColor" d="M3 5v4h2V5h4V3H5c-1.1 0-2 .9-2 2zm2 10H3v4c0 1.1.9 2 2 2h4v-2H5v-4zm14 4h-4v2h4c1.1 0 2-.9 2-2v-4h-2v4zm0-16h-4v2h4v4h2V5c0-1.1-.9-2-2-2z" />
+        </svg>
+      </button>
+    </div>
   </div>
 </div>

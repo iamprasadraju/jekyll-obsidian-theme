@@ -274,28 +274,19 @@
   var graphDataCache = null
   var graphHoveredNode = null
   var graphAdjacency = {}
-  function easeOutCubic(t) {
-    return 1 - Math.pow(1 - t, 3)
-  }
+  var graphFilters = { tags: {}, folders: {}, showOrphans: true, showLabels: true, linkDepth: 1 }
+  var graphColorGroups = []
+  var graphAllNodes = []
+  var graphAllLinks = []
+  var graphVisibleNodes = []
+  var graphVisibleLinks = []
+  var graphShowLabels = true
 
-  function computeCircularLayout(nodes) {
-    var positions = {}
-    var cx = 0, cy = 0
-    var radius = Math.max(200, Math.sqrt(nodes.length) * 40)
-    nodes.forEach(function (n, i) {
-      var angle = (2 * Math.PI * i) / nodes.length - Math.PI / 2
-      positions[n.id] = [cx + radius * Math.cos(angle), cy + radius * Math.sin(angle)]
-    })
-    return positions
-  }
-
-  // Obsidian-style colors: silver nodes, dark lines
   var NODE_COLOR_DARK = "#a9a9b2"
   var NODE_COLOR_LIGHT = "#52525b"
   var NODE_HOVER_COLOR = "#a78bfa"
   var NODE_HOVER_COLOR_LIGHT = "#7c3aed"
-  var FOCUSED_COLOR = "#c8c8d0"
-  var FOCUSED_COLOR_LIGHT = "#3f3f46"
+  var FOCUSED_RING_COLOR = "#a78bfa"
   var HOVER_TRANSITION_SPEED = 0.15
   var DIM_OPACITY = 0.12
   var EDGE_DEFAULT_DARK = "rgba(43, 43, 43, 0.8)"
@@ -367,6 +358,161 @@
     return adj
   }
 
+  function getNodeColor(n, isDark) {
+    for (var i = 0; i < graphColorGroups.length; i++) {
+      var group = graphColorGroups[i]
+      if (n.tags && n.tags.indexOf(group.tag) !== -1) {
+        return group.color
+      }
+    }
+    return isDark ? NODE_COLOR_DARK : NODE_COLOR_LIGHT
+  }
+
+  function filterNodesAndLinks(data, currentPath, applyLinkDepth) {
+    var backlinkCounts = {}
+    data.edges.forEach(function (e) {
+      backlinkCounts[e.to] = (backlinkCounts[e.to] || 0) + 1
+      backlinkCounts[e.from] = (backlinkCounts[e.from] || 0) + 1
+    })
+
+    var isDark = document.documentElement.getAttribute("data-theme") !== "light"
+    var visibleNodeIds = new Set()
+
+    data.nodes.forEach(function (n) {
+      if (n.url.indexOf("#") === 0) return
+      if (!graphFilters.showOrphans && n.orphan) return
+      if (graphFilters.folders[n.group] === false) return
+      if (n.tags) {
+        for (var i = 0; i < n.tags.length; i++) {
+          if (graphFilters.tags[n.tags[i]] === false) return
+        }
+      }
+      visibleNodeIds.add(n.id)
+    })
+
+    if (applyLinkDepth && graphFilters.linkDepth > 0 && currentPath) {
+      var currentNode = null
+      for (var i = 0; i < data.nodes.length; i++) {
+        if (data.nodes[i].url === currentPath) {
+          currentNode = data.nodes[i]
+          break
+        }
+      }
+      if (currentNode) {
+        var depthNodes = new Set([currentNode.id])
+        var frontier = new Set([currentNode.id])
+        for (var d = 0; d < graphFilters.linkDepth; d++) {
+          var nextFrontier = new Set()
+          frontier.forEach(function (fid) {
+            data.edges.forEach(function (e) {
+              if (e.from === fid && visibleNodeIds.has(e.to)) {
+                nextFrontier.add(e.to)
+                depthNodes.add(e.to)
+              }
+              if (e.to === fid && visibleNodeIds.has(e.from)) {
+                nextFrontier.add(e.from)
+                depthNodes.add(e.from)
+              }
+            })
+          })
+          frontier = nextFrontier
+        }
+        visibleNodeIds = depthNodes
+      }
+    }
+
+    var nodes = data.nodes.filter(function (n) { return visibleNodeIds.has(n.id) }).map(function (n) {
+      var isFocused = n.url === currentPath
+      var links = backlinkCounts[n.id] || 0
+      return {
+        id: n.id,
+        name: n.label,
+        url: n.url,
+        group: n.group,
+        tags: n.tags || [],
+        orphan: n.orphan || false,
+        color: getNodeColor(n, isDark),
+        val: isFocused ? 4 : 1 + Math.sqrt(links) * 0.5,
+        isFocused: isFocused,
+        hoverOpacity: 1,
+        targetOpacity: 1,
+      }
+    })
+
+    var links = data.edges.filter(function (e) {
+      return visibleNodeIds.has(e.from) && visibleNodeIds.has(e.to)
+    }).map(function (e, i) {
+      return { source: e.from, target: e.to, index: i }
+    })
+
+    return { nodes: nodes, links: links }
+  }
+
+  function renderNodeCanvas(n, ctx, globalScale, isDark, hoveredNode, adjacency) {
+    var color = n.color
+    var opacity = n.hoverOpacity
+    var labelColor = isDark ? LABEL_COLOR_DARK : LABEL_COLOR_LIGHT
+
+    if (hoveredNode !== null) {
+      if (n.id === hoveredNode) {
+        color = isDark ? NODE_HOVER_COLOR : NODE_HOVER_COLOR_LIGHT
+        n.targetOpacity = 1
+      } else if (adjacency[hoveredNode] && adjacency[hoveredNode].neighbors.has(n.id)) {
+        n.targetOpacity = 1
+      } else {
+        n.targetOpacity = DIM_OPACITY
+      }
+    } else {
+      n.targetOpacity = 1
+    }
+
+    n.hoverOpacity += (n.targetOpacity - n.hoverOpacity) * HOVER_TRANSITION_SPEED
+    if (Math.abs(n.hoverOpacity - n.targetOpacity) < 0.01) {
+      n.hoverOpacity = n.targetOpacity
+    }
+    opacity = n.hoverOpacity
+
+    var r = Math.sqrt(n.val) * 2
+    ctx.globalAlpha = opacity
+
+    if (n.isFocused && hoveredNode === null) {
+      ctx.beginPath()
+      ctx.arc(n.x, n.y, r + 2, 0, 2 * Math.PI, false)
+      ctx.strokeStyle = FOCUSED_RING_COLOR
+      ctx.lineWidth = 2 / globalScale
+      ctx.stroke()
+    }
+
+    ctx.beginPath()
+    ctx.arc(n.x, n.y, r, 0, 2 * Math.PI, false)
+    ctx.fillStyle = color
+    ctx.fill()
+
+    if (graphShowLabels && n.name) {
+      var showLabel = true
+      if (hoveredNode !== null) {
+        showLabel = n.id === hoveredNode || (adjacency[hoveredNode] && adjacency[hoveredNode].neighbors.has(n.id))
+      }
+
+      if (showLabel) {
+        var fontSize = 10 / globalScale
+        ctx.font = fontSize + "px -apple-system, BlinkMacSystemFont, sans-serif"
+        var textWidth = ctx.measureText(n.name).width
+        var labelY = n.y + r + 2 / globalScale
+
+        ctx.fillStyle = isDark ? "rgba(21, 21, 21, 0.7)" : "rgba(255, 255, 255, 0.7)"
+        ctx.fillRect(n.x - textWidth / 2 - 2, labelY - 1, textWidth + 4, fontSize + 2)
+
+        ctx.fillStyle = labelColor
+        ctx.textAlign = "center"
+        ctx.textBaseline = "top"
+        ctx.fillText(n.name, n.x, labelY)
+      }
+    }
+
+    ctx.globalAlpha = 1
+  }
+
   function initGraphView() {
     if (graphInstance) {
       graphInstance._cleanupGraphKeys && graphInstance._cleanupGraphKeys()
@@ -389,76 +535,24 @@
         var isDark = document.documentElement.getAttribute("data-theme") !== "light"
         var currentPath = window.location.pathname
 
-        // Load cached positions
+        graphColorGroups = (data.filters && data.filters.color_groups) || []
+        graphAllNodes = data.nodes
+        graphAllLinks = data.edges
+
         var cached = {}
         try { cached = JSON.parse(localStorage.getItem("graph-pos") || "{}") } catch (e) { /* ignore */ }
 
-        // Calculate backlink counts for node sizing
-        var backlinkCounts = {}
-        data.edges.forEach(function (e) {
-          backlinkCounts[e.to] = (backlinkCounts[e.to] || 0) + 1
-          backlinkCounts[e.from] = (backlinkCounts[e.from] || 0) + 1
+        var filtered = filterNodesAndLinks(data, currentPath, false)
+        graphVisibleNodes = filtered.nodes
+        graphVisibleLinks = filtered.links
+
+        graphAdjacency = buildAdjacency(graphAllNodes, graphAllLinks)
+
+        var nodes = filtered.nodes.map(function (n) {
+          return n
         })
 
-        var defaultColor = isDark ? NODE_COLOR_DARK : NODE_COLOR_LIGHT
-        var focusedColor = isDark ? FOCUSED_COLOR : FOCUSED_COLOR_LIGHT
-        var hoverColor = isDark ? NODE_HOVER_COLOR : NODE_HOVER_COLOR_LIGHT
-
-        // Compute target positions: use cached or circular fallback
-        var hasCachedPositions = Object.keys(cached).length > 0
-        var fallbackPositions = computeCircularLayout(data.nodes)
-        var dynamicStagger = Math.max(3, Math.min(40, 1500 / data.nodes.length))
-
-        // Prepare nodes with off-screen starting positions
-        var nodes = data.nodes.map(function (n, i) {
-          var cp = cached[n.url]
-          var isFocused = n.url === currentPath
-          var links = backlinkCounts[n.id] || 0
-          var targetX, targetY
-          if (cp) {
-            targetX = cp[0]
-            targetY = cp[1]
-          } else {
-            targetX = fallbackPositions[n.id][0]
-            targetY = fallbackPositions[n.id][1]
-          }
-
-          // Start off-screen: pick a random edge of the viewport
-          var angle = Math.random() * 2 * Math.PI
-          var dist = 2500 + Math.random() * 1500
-          var startX = targetX + Math.cos(angle) * dist
-          var startY = targetY + Math.sin(angle) * dist
-
-          return {
-            id: n.id,
-            name: n.label,
-            url: n.url,
-            group: n.group,
-            color: isFocused ? focusedColor : defaultColor,
-            val: isFocused ? 8 : Math.max(4, 2 + Math.sqrt(links) * 1.5),
-            isFocused: isFocused,
-            x: startX,
-            y: startY,
-            fx: startX,
-            fy: startY,
-            _startX: startX,
-            _startY: startY,
-            targetX: targetX,
-            targetY: targetY,
-            hoverOpacity: 1,
-            targetOpacity: 1,
-            flyInDelay: i * dynamicStagger,
-            flyInDone: false,
-          }
-        })
-
-        // Prepare links with edge indices
-        var links = data.edges.map(function (e, i) {
-          return { source: e.from, target: e.to, index: i }
-        })
-
-        // Build adjacency map for hover highlighting
-        graphAdjacency = buildAdjacency(data.nodes, data.edges)
+        var links = filtered.links
 
         var fg = ForceGraph()(container)
           .graphData({ nodes: nodes, links: links })
@@ -485,67 +579,15 @@
           .nodeColor(function (n) { return n.color })
           .nodeVal(function (n) {
             if (graphHoveredNode !== null) {
-              if (n.id === graphHoveredNode) return n.val * 1.8
+              if (n.id === graphHoveredNode) return n.val * 1.5
               var adj = graphAdjacency[graphHoveredNode]
-              if (adj && adj.neighbors.has(n.id)) return n.val * 1.3
+              if (adj && adj.neighbors.has(n.id)) return n.val * 1.2
               return n.val * 0.5
             }
             return n.val
           })
           .nodeCanvasObject(function (n, ctx, globalScale) {
-            var color = defaultColor
-            var opacity = n.hoverOpacity
-
-            // Smooth opacity transition on hover
-            if (graphHoveredNode !== null) {
-              if (n.id === graphHoveredNode) {
-                color = hoverColor
-                n.targetOpacity = 1
-              } else if (graphAdjacency[graphHoveredNode] && graphAdjacency[graphHoveredNode].neighbors.has(n.id)) {
-                color = hoverColor
-                n.targetOpacity = 1
-              } else {
-                n.targetOpacity = DIM_OPACITY
-              }
-            } else {
-              n.targetOpacity = 1
-            }
-
-            // Interpolate opacity for smooth transition
-            n.hoverOpacity += (n.targetOpacity - n.hoverOpacity) * HOVER_TRANSITION_SPEED
-            if (Math.abs(n.hoverOpacity - n.targetOpacity) < 0.01) {
-              n.hoverOpacity = n.targetOpacity
-            }
-            opacity = n.hoverOpacity
-
-            if (n.isFocused && graphHoveredNode === null) {
-              color = focusedColor
-            }
-
-            var r = Math.sqrt(n.val) * 3
-            ctx.globalAlpha = opacity
-            ctx.beginPath()
-            ctx.arc(n.x, n.y, r, 0, 2 * Math.PI, false)
-            ctx.fillStyle = color
-            ctx.fill()
-
-            // Always show labels when not hovering, show on hover for node + neighbors
-            var showLabel = true
-            if (graphHoveredNode !== null) {
-              showLabel = n.id === graphHoveredNode || (graphAdjacency[graphHoveredNode] && graphAdjacency[graphHoveredNode].neighbors.has(n.id))
-            }
-
-            if (showLabel && n.name) {
-              var fontSize = 10 / globalScale
-              ctx.font = fontSize + "px -apple-system, BlinkMacSystemFont, sans-serif"
-              ctx.fillStyle = isDark ? LABEL_COLOR_DARK : LABEL_COLOR_LIGHT
-              ctx.globalAlpha = opacity
-              ctx.textAlign = "center"
-              ctx.textBaseline = "top"
-              ctx.fillText(n.name, n.x, n.y + r + 2)
-            }
-
-            ctx.globalAlpha = 1
+            renderNodeCanvas(n, ctx, globalScale, isDark, graphHoveredNode, graphAdjacency)
           })
           .onNodeHover(function (node) {
             graphHoveredNode = node ? node.id : null
@@ -553,205 +595,198 @@
           })
           .d3AlphaDecay(0.02)
           .d3VelocityDecay(0.4)
-          .warmupTicks(0)
+          .warmupTicks(400)
           .cooldownTicks(0)
           .cooldownTime(0)
-          .minZoom(0.08)
+          .minZoom(0.05)
           .maxZoom(10)
           .onNodeClick(function (n) {
             if (n.url && n.url.indexOf("#") !== 0) window.location.href = n.url
           })
 
-        // ─── Staggered Fly-In Animation ──────────────────
-        var animStartTime = null
-        var flyInDuration = 800
-        var animDone = false
-        var hasFittedAfterAnim = false
+        function doZoomToFit() {
+          fg.zoomToFit(600, 60)
+          setTimeout(function () {
+            var positions = {}
+            fg.graphData().nodes.forEach(function (n) {
+              if (n.x !== undefined && n.y !== undefined) {
+                positions[n.url] = [n.x, n.y]
+              }
+            })
+            localStorage.setItem("graph-pos", JSON.stringify(positions))
+          }, 200)
+        }
 
-        function runFlyInAnimation() {
-          if (animDone) return
-
-          var allDone = true
-          nodes.forEach(function (n) {
-            if (n.flyInDone) return
-            var elapsed = performance.now() - animStartTime - n.flyInDelay
-            if (elapsed < 0) {
-              allDone = false
-              return
-            }
-            var t = Math.min(elapsed / flyInDuration, 1)
-            var eased = easeOutCubic(t)
-            n.x = n.fx = n.targetX - (n.targetX - n._startX) * (1 - eased)
-            n.y = n.fy = n.targetY - (n.targetY - n._startY) * (1 - eased)
-            if (t >= 1) {
-              n.x = n.fx = n.targetX
-              n.y = n.fy = n.targetY
-              n.flyInDone = true
-            } else {
-              allDone = false
-            }
-          })
-
-          if (allDone) {
-            animDone = true
-            onFlyInComplete()
+        function handleGraphResize() {
+          if (!container) return
+          var w = container.clientWidth
+          var h = container.clientHeight
+          if (w > 0 && h > 0) {
+            fg.width(w).height(h)
           }
         }
 
-        function onFlyInComplete() {
-          // Remove position pins so nodes become draggable
-          nodes.forEach(function (n) {
-            delete n.fx
-            delete n.fy
-            delete n._startX
-            delete n._startY
-            delete n.flyInDelay
-            delete n.flyInDone
-            delete n.targetX
-            delete n.targetY
-          })
-
-          // Restore force settings for interactive use
-          fg.d3AlphaDecay(0.005)
-          fg.d3VelocityDecay(0.15)
-          fg.warmupTicks(10)
-          fg.cooldownTicks(40)
-          fg.cooldownTime(2000)
-
-          // Reheat with gentle settings
-          fg.d3ReheatSimulation()
-
-          // Zoom to fit after settle
-          fg.onEngineStop(function () {
-            if (!hasFittedAfterAnim) {
-              hasFittedAfterAnim = true
-              fg.zoomToFit(600, 60)
-            }
-            // Cache positions
-            setTimeout(function () {
-              var positions = {}
-              fg.graphData().nodes.forEach(function (n) {
-                if (n.x !== undefined && n.y !== undefined) {
-                  positions[n.url] = [n.x, n.y]
-                }
-              })
-              localStorage.setItem("graph-pos", JSON.stringify(positions))
-            }, 800)
-          })
+        var resizeTimer = null
+        function onResize() {
+          clearTimeout(resizeTimer)
+          resizeTimer = setTimeout(handleGraphResize, 100)
         }
 
-        // Use onRenderFramePre to drive the animation each frame
-        fg.onRenderFramePre(function () {
-          if (!animDone) {
-            runFlyInAnimation()
+        window.addEventListener('resize', onResize)
+
+        var zoomDone = false
+        fg.onEngineStop(function () {
+          if (!zoomDone) {
+            zoomDone = true
+            doZoomToFit()
           }
         })
 
-        // If cached positions exist, skip fly-in — go straight to interactive mode
-        if (hasCachedPositions) {
-          animDone = true
-          nodes.forEach(function (n) {
-            n.x = n.targetX
-            n.y = n.targetY
-            delete n.fx
-            delete n.fy
-            delete n._startX
-            delete n._startY
-            delete n.flyInDelay
-            delete n.flyInDone
-            delete n.targetX
-            delete n.targetY
-          })
+        setTimeout(function () {
+          if (!zoomDone) {
+            zoomDone = true
+            doZoomToFit()
+          }
+        }, 600)
 
-          // Restore normal force settings
-          fg.d3AlphaDecay(0.005)
-          fg.d3VelocityDecay(0.15)
-          fg.warmupTicks(10)
-          fg.cooldownTicks(40)
-          fg.cooldownTime(2000)
-
-          var hasFitted = false
-          fg.onEngineTick(function () {
-            if (!hasFitted) {
-              hasFitted = true
-              fg.zoomToFit(1200, 80)
-            }
-          })
-          fg.onEngineStop(function () {
-            fg.zoomToFit(600, 60)
-            setTimeout(function () {
-              var positions = {}
-              fg.graphData().nodes.forEach(function (n) {
-                if (n.x !== undefined && n.y !== undefined) {
-                  positions[n.url] = [n.x, n.y]
-                }
-              })
-              localStorage.setItem("graph-pos", JSON.stringify(positions))
-            }, 800)
-          })
-        } else {
-          // Store starting positions and set animation start time
-          nodes.forEach(function (n) {
-            n._startX = n.x
-            n._startY = n.y
-          })
-          animStartTime = performance.now()
-        }
-
-        // Arrow key panning
         function handleGraphKeys(e) {
           var graphEl = document.getElementById("graph-view")
           if (!graphEl || !graphEl.classList.contains("is-open")) return
-
           var step = e.shiftKey ? 100 : 40
           var center = fg.center()
           var scale = fg.zoom()
           var handled = false
-
           switch (e.key) {
-            case "ArrowLeft":
-              fg.centerAt(center.x - step / scale, undefined, 200)
-              handled = true
-              break
-            case "ArrowRight":
-              fg.centerAt(center.x + step / scale, undefined, 200)
-              handled = true
-              break
-            case "ArrowUp":
-              fg.centerAt(undefined, center.y - step / scale, 200)
-              handled = true
-              break
-            case "ArrowDown":
-              fg.centerAt(undefined, center.y + step / scale, 200)
-              handled = true
-              break
-            case "+":
-            case "=":
-              fg.zoom(scale * 1.3, 300)
-              handled = true
-              break
-            case "-":
-            case "_":
-              fg.zoom(scale * 0.7, 300)
-              handled = true
-              break
-            case "0":
-              fg.zoomToFit(600, 60)
-              handled = true
-              break
+            case "ArrowLeft": fg.centerAt(center.x - step / scale, undefined, 200); handled = true; break
+            case "ArrowRight": fg.centerAt(center.x + step / scale, undefined, 200); handled = true; break
+            case "ArrowUp": fg.centerAt(undefined, center.y - step / scale, 200); handled = true; break
+            case "ArrowDown": fg.centerAt(undefined, center.y + step / scale, 200); handled = true; break
+            case "+": case "=": fg.zoom(scale * 1.3, 300); handled = true; break
+            case "-": case "_": fg.zoom(scale * 0.7, 300); handled = true; break
+            case "0": fg.zoomToFit(600, 60); handled = true; break
           }
-
           if (handled) e.preventDefault()
         }
-
         document.addEventListener("keydown", handleGraphKeys)
-
         fg._cleanupGraphKeys = function () {
           document.removeEventListener("keydown", handleGraphKeys)
+          window.removeEventListener('resize', onResize)
+          clearTimeout(resizeTimer)
+        }
+
+        fg._refreshGraph = function () {
+          var filtered = filterNodesAndLinks(graphDataCache, currentPath, false)
+          fg.graphData({ nodes: filtered.nodes, links: filtered.links })
         }
 
         graphInstance = fg
       })
+    })
+  }
+
+  function initGraphFilters() {
+    loadGraphData(function (data) {
+      var tagContainer = document.getElementById("tag-filters")
+      var folderContainer = document.getElementById("folder-filters")
+      if (!tagContainer || !folderContainer) return
+
+      var filters = data.filters || {}
+      var tags = filters.tags || []
+      var folders = filters.folders || []
+      graphColorGroups = filters.color_groups || []
+
+      var colorMap = {}
+      graphColorGroups.forEach(function (g) { colorMap[g.tag] = g.color })
+
+      tagContainer.innerHTML = ""
+      tags.forEach(function (tag) {
+        if (graphFilters.tags[tag] === undefined) graphFilters.tags[tag] = true
+        var item = document.createElement("label")
+        item.className = "filter-item"
+        var dot = document.createElement("span")
+        dot.className = "filter-color-dot"
+        dot.style.background = colorMap[tag] || NODE_COLOR_DARK
+        var cb = document.createElement("input")
+        cb.type = "checkbox"
+        cb.checked = graphFilters.tags[tag]
+        cb.addEventListener("change", function () {
+          graphFilters.tags[tag] = cb.checked
+          if (graphInstance) graphInstance._refreshGraph()
+        })
+        var span = document.createElement("span")
+        span.textContent = tag
+        item.appendChild(cb)
+        item.appendChild(dot)
+        item.appendChild(span)
+        tagContainer.appendChild(item)
+      })
+
+      folderContainer.innerHTML = ""
+      folders.forEach(function (folder) {
+        if (graphFilters.folders[folder] === undefined) graphFilters.folders[folder] = true
+        var item = document.createElement("label")
+        item.className = "filter-item"
+        var cb = document.createElement("input")
+        cb.type = "checkbox"
+        cb.checked = graphFilters.folders[folder]
+        cb.addEventListener("change", function () {
+          graphFilters.folders[folder] = cb.checked
+          if (graphInstance) graphInstance._refreshGraph()
+        })
+        var span = document.createElement("span")
+        span.textContent = folder
+        item.appendChild(cb)
+        item.appendChild(span)
+        folderContainer.appendChild(item)
+      })
+
+      var showOrphansCb = document.getElementById("show-orphans")
+      var showLabelsCb = document.getElementById("show-labels")
+      var linkDepthSlider = document.getElementById("link-depth")
+      var linkDepthValue = document.getElementById("link-depth-value")
+
+      if (showOrphansCb) {
+        showOrphansCb.checked = graphFilters.showOrphans
+        showOrphansCb.addEventListener("change", function () {
+          graphFilters.showOrphans = showOrphansCb.checked
+          if (graphInstance) graphInstance._refreshGraph()
+        })
+      }
+
+      if (showLabelsCb) {
+        showLabelsCb.checked = graphShowLabels
+        showLabelsCb.addEventListener("change", function () {
+          graphShowLabels = showLabelsCb.checked
+        })
+      }
+
+      if (linkDepthSlider) {
+        linkDepthSlider.value = graphFilters.linkDepth
+        if (linkDepthValue) linkDepthValue.textContent = graphFilters.linkDepth
+        linkDepthSlider.addEventListener("input", function () {
+          graphFilters.linkDepth = parseInt(linkDepthSlider.value)
+          if (linkDepthValue) linkDepthValue.textContent = linkDepthSlider.value
+          if (graphInstance) graphInstance._refreshGraph()
+        })
+      }
+
+      var resetTagBtn = document.querySelector('[data-action="reset-tag-filters"]')
+      if (resetTagBtn) {
+        resetTagBtn.addEventListener("click", function () {
+          tags.forEach(function (tag) { graphFilters.tags[tag] = true })
+          tagContainer.querySelectorAll("input[type='checkbox']").forEach(function (cb) { cb.checked = true })
+          if (graphInstance) graphInstance._refreshGraph()
+        })
+      }
+
+      var resetFolderBtn = document.querySelector('[data-action="reset-folder-filters"]')
+      if (resetFolderBtn) {
+        resetFolderBtn.addEventListener("click", function () {
+          folders.forEach(function (folder) { graphFilters.folders[folder] = true })
+          folderContainer.querySelectorAll("input[type='checkbox']").forEach(function (cb) { cb.checked = true })
+          if (graphInstance) graphInstance._refreshGraph()
+        })
+      }
     })
   }
 
@@ -769,11 +804,9 @@
         var isDark = document.documentElement.getAttribute("data-theme") !== "light"
         var currentUrl = window.location.pathname
 
-        // Find current node
         var currentNode = data.nodes.find(function (n) { return n.url === currentUrl })
         if (!currentNode) return
 
-        // Get neighbors (1 hop) — only real nodes (exclude test nodes)
         var neighborIds = new Set([currentNode.id])
         data.edges.forEach(function (e) {
           if (e.from === currentNode.id) neighborIds.add(e.to)
@@ -783,6 +816,7 @@
         var defaultColor = isDark ? NODE_COLOR_DARK : NODE_COLOR_LIGHT
         var focusedColor = isDark ? NODE_HOVER_COLOR : NODE_HOVER_COLOR_LIGHT
         var hoverColor = isDark ? NODE_HOVER_COLOR : NODE_HOVER_COLOR_LIGHT
+        var colorGroups = (data.filters && data.filters.color_groups) || []
 
         var miniAdjacency = buildAdjacency(
           data.nodes.filter(function (n) { return neighborIds.has(n.id) }),
@@ -792,13 +826,22 @@
         var nodes = data.nodes
           .filter(function (n) { return neighborIds.has(n.id) && n.url.indexOf("#") !== 0 })
           .map(function (n) {
+            var color = defaultColor
+            for (var i = 0; i < colorGroups.length; i++) {
+              if (n.tags && n.tags.indexOf(colorGroups[i].tag) !== -1) {
+                color = colorGroups[i].color
+                break
+              }
+            }
             return {
               id: n.id,
               name: n.label,
               url: n.url,
-              color: n.id === currentNode.id ? focusedColor : defaultColor,
-              val: n.id === currentNode.id ? 10 : 5,
+              color: n.id === currentNode.id ? focusedColor : color,
+              val: n.id === currentNode.id ? 4 : 1.5,
               isFocused: n.id === currentNode.id,
+              hoverOpacity: 1,
+              targetOpacity: 1,
             }
           })
 
@@ -843,7 +886,7 @@
             return n.val
           })
           .nodeCanvasObject(function (n, ctx, globalScale) {
-            var color = defaultColor
+            var color = n.color
             var opacity = 1
 
             if (miniHoveredNode !== null) {
@@ -857,14 +900,22 @@
               color = focusedColor
             }
 
-            var r = Math.sqrt(n.val) * 3
+            var r = Math.sqrt(n.val) * 2
             ctx.globalAlpha = opacity
+
+            if (n.isFocused && miniHoveredNode === null) {
+              ctx.beginPath()
+              ctx.arc(n.x, n.y, r + 2, 0, 2 * Math.PI, false)
+              ctx.strokeStyle = FOCUSED_RING_COLOR
+              ctx.lineWidth = 2 / globalScale
+              ctx.stroke()
+            }
+
             ctx.beginPath()
             ctx.arc(n.x, n.y, r, 0, 2 * Math.PI, false)
             ctx.fillStyle = color
             ctx.fill()
 
-            // Always show labels — Obsidian behavior
             if (n.name) {
               var showLabel = true
               if (miniHoveredNode !== null) {
@@ -873,11 +924,17 @@
               if (showLabel) {
                 var fontSize = 9 / globalScale
                 ctx.font = fontSize + "px -apple-system, sans-serif"
+                var textWidth = ctx.measureText(n.name).width
+                var labelY = n.y + r + 2 / globalScale
+
+                ctx.fillStyle = isDark ? "rgba(21, 21, 21, 0.7)" : "rgba(255, 255, 255, 0.7)"
+                ctx.fillRect(n.x - textWidth / 2 - 2, labelY - 1, textWidth + 4, fontSize + 2)
+
                 ctx.fillStyle = isDark ? LABEL_COLOR_DARK : LABEL_COLOR_LIGHT
                 ctx.globalAlpha = opacity
                 ctx.textAlign = "center"
                 ctx.textBaseline = "top"
-                ctx.fillText(n.name, n.x, n.y + r + 2)
+                ctx.fillText(n.name, n.x, labelY)
               }
             }
 
@@ -1516,6 +1573,42 @@
           var canvasContainer = document.getElementById("graph-canvas")
           if (canvasContainer) canvasContainer.innerHTML = ""
           graphEl2.classList.remove("is-open")
+          var filterPanel = document.getElementById("graph-filter-panel")
+          if (filterPanel) filterPanel.classList.remove("is-open")
+          var filterBtn = document.getElementById("graph-filter-btn")
+          if (filterBtn) filterBtn.classList.remove("is-active")
+        }
+        break
+
+      case "toggle-graph-filter":
+        var filterPanel = document.getElementById("graph-filter-panel")
+        var filterBtn = document.getElementById("graph-filter-btn")
+        if (filterPanel) {
+          filterPanel.classList.toggle("is-open")
+          if (filterBtn) filterBtn.classList.toggle("is-active")
+          if (filterPanel.classList.contains("is-open") && graphDataCache) {
+            initGraphFilters()
+          }
+        }
+        break
+
+      case "zoom-in":
+        if (graphInstance) {
+          var scale = graphInstance.zoom()
+          graphInstance.zoom(scale * 1.3, 300)
+        }
+        break
+
+      case "zoom-out":
+        if (graphInstance) {
+          var scale2 = graphInstance.zoom()
+          graphInstance.zoom(scale2 * 0.7, 300)
+        }
+        break
+
+      case "zoom-fit":
+        if (graphInstance) {
+          graphInstance.zoomToFit(600, 60)
         }
         break
 

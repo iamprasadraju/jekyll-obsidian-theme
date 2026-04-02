@@ -29,6 +29,7 @@
   flex-direction: column;
   overflow: hidden;
   box-sizing: border-box;
+  position: relative;
 
   @media (max-width: 768px) {
     width: 96vw;
@@ -45,12 +46,8 @@
 }
 
 @keyframes graphOpen {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .graph-view-header {
@@ -62,6 +59,7 @@
   border-bottom: var(--border-width) solid var(--border);
   flex-shrink: 0;
   background: var(--background-secondary);
+  z-index: 10;
 }
 
 .graph-view-title {
@@ -94,10 +92,18 @@
   font-size: var(--font-size-sm);
   color: var(--text-muted);
   transition: all var(--transition-fast);
+  border: none;
+  background: transparent;
+  cursor: pointer;
 
   &:hover {
     background: var(--hover);
     color: var(--text-normal);
+  }
+
+  &.is-active {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
   }
 
   svg {
@@ -111,6 +117,200 @@
   flex: 1;
   overflow: hidden;
   position: relative;
+
+  // Obsidian-style dot grid background
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, var(--graph-dot) 1px, transparent 1px);
+    background-size: var(--graph-dot-spacing) var(--graph-dot-spacing);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  canvas {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// Obsidian-style filter panel
+.graph-filter-panel {
+  position: absolute;
+  top: var(--header-height);
+  right: 0;
+  width: 280px;
+  height: calc(100% - var(--header-height));
+  background: var(--background-secondary);
+  border-left: var(--border-width) solid var(--border);
+  z-index: 20;
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 200ms ease;
+  padding: var(--sp-3);
+
+  &.is-open {
+    transform: translateX(0);
+  }
+
+  @media (max-width: 768px) {
+    width: 260px;
+  }
+}
+
+.filter-section {
+  margin-bottom: var(--sp-4);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.filter-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--bold-weight);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.filter-reset-btn {
+  background: none;
+  border: none;
+  color: var(--interactive-accent);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+
+  &:hover {
+    background: var(--hover);
+  }
+}
+
+.filter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  font-size: var(--font-size-sm);
+  color: var(--text-normal);
+
+  &:hover {
+    background: var(--hover);
+  }
+
+  input[type="checkbox"] {
+    accent-color: var(--interactive-accent);
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .filter-color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+}
+
+.filter-option {
+  padding: 4px 0;
+}
+
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--text-normal);
+
+  input[type="checkbox"] {
+    accent-color: var(--interactive-accent);
+    margin: 0;
+    cursor: pointer;
+  }
+}
+
+.filter-checkbox-label {
+  user-select: none;
+}
+
+.filter-range-label {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--font-size-sm);
+  color: var(--text-normal);
+
+  .filter-range {
+    flex: 1;
+    accent-color: var(--interactive-accent);
+    cursor: pointer;
+  }
+
+  .filter-range-value {
+    min-width: 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+  }
+}
+
+// Zoom controls - Obsidian style
+.graph-zoom-controls {
+  position: absolute;
+  bottom: var(--sp-3);
+  right: var(--sp-3);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 15;
+}
+
+.graph-zoom-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background-secondary);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 0;
+
+  &:hover {
+    background: var(--hover);
+    color: var(--text-normal);
+    border-color: var(--border-hover);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+  }
 }
 
 // Sidebar mini graph
@@ -128,12 +328,28 @@
   user-select: none;
   margin-top: var(--sp-2);
 
+  // Dot grid for mini graph
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, var(--graph-dot) 1px, transparent 1px);
+    background-size: var(--graph-dot-spacing) var(--graph-dot-spacing);
+    pointer-events: none;
+    z-index: 0;
+  }
+
   &:active {
     cursor: grabbing;
   }
 
   &:hover {
     border-color: var(--border-hover);
+  }
+
+  canvas {
+    position: relative;
+    z-index: 1;
   }
 }
 
@@ -174,6 +390,10 @@
     height: 180px;
     min-height: 100px;
     margin-top: var(--sp-1);
+  }
+
+  .graph-filter-panel {
+    width: 100%;
   }
 }
 

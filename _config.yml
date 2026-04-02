@@ -49,6 +49,17 @@ obsidian:
     lazy_load: true
     mini_graph: true
     test_nodes: 0  # Set to >0 to add fake test nodes for graph performance testing
+    # Color groups for nodes (tag -> color mapping, like Obsidian)
+    color_groups:
+      concepts: "#7b68ee"
+      guide: "#4fc3f7"
+      project: "#ff7043"
+      daily: "#66bb6a"
+      setup: "#4fc3f7"
+      method: "#7b68ee"
+      knowledge-management: "#7b68ee"
+      jekyll: "#ff7043"
+      theme: "#ff7043"
   # Slide overlay (Andy Matuschak style)
   slides:
     enabled: true

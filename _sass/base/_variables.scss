@@ -272,6 +272,16 @@
   --img-zoom-max-width: 96%;
   --img-zoom-max-height: 90vh;
 
+  // ─── Graph View ──────────────────────────────────────
+  --graph-dot: rgba(255, 255, 255, 0.08);
+  --graph-dot-spacing: 24px;
+  --graph-node-default: #a9a9b2;
+  --graph-node-hover: #a78bfa;
+  --graph-edge: rgba(43, 43, 43, 0.8);
+  --graph-edge-highlight: rgba(167, 139, 250, 0.7);
+  --graph-label: #d1d5db;
+  --graph-dim-opacity: 0.12;
+
   // ─── Mono ────────────────────────────────────────────
   --mono100: white;
   --mono0: black;

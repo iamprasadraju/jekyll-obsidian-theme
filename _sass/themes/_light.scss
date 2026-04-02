@@ -146,4 +146,12 @@
   --title-color-inactive: var(--tx2);
 
   --modal-border: var(--ui2);
+
+  // Graph view light theme
+  --graph-dot: rgba(0, 0, 0, 0.1);
+  --graph-node-default: #52525b;
+  --graph-node-hover: #7c3aed;
+  --graph-edge: rgba(156, 163, 175, 0.35);
+  --graph-edge-highlight: rgba(124, 58, 237, 0.5);
+  --graph-label: #374151;
 }
