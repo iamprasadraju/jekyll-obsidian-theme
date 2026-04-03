@@ -16,11 +16,11 @@
   [Features](#features) &bull;
   [Getting Started](#getting-started) &bull;
   [Stay Updated](#stay-updated) &bull;
-  [Local Development](#local-development-optional) &bull;
   [Sync Your Vault](#sync-your-obsidian-vault) &bull;
   [Configuration](#configuration) &bull;
   [Customization](#customization) &bull;
-  [Deployment](#deployment)
+  [Deployment](#deployment) &bull;
+  [Local Development](#local-development)
 
 </div>
 
@@ -81,63 +81,67 @@
 
 ### 1. Create Your Repository
 
-Go to the [jekyll-obsidian-theme](https://github.com/iamprasadraju/jekyll-obsidian-theme) repo and click **"Use this template"** → **"Create a new repository"**.
+Create a new GitHub repository with these files:
 
-Your notes stay in your repo — they're never pushed to the upstream theme.
-
-### 2. Configure Your Site
-
-Edit `_config.yml` directly on GitHub:
-
-```yaml
-title: "My Vault"                          # Your site title
-baseurl: ""                                # Root path (e.g. "/blog" for subfolder)
-url: "https://yourusername.github.io"      # Your site URL
+**`Gemfile`:**
+```ruby
+source "https://rubygems.org"
+gem "jekyll", "~> 4.3"
+gem "jekyll-remote-theme"
 ```
+
+**`_config.yml`:**
+```yaml
+title: "My Vault"
+description: "A personal knowledge base"
+baseurl: ""
+url: "https://yourusername.github.io"
+
+remote_theme: "iamprasadraju/jekyll-obsidian-theme"
+plugins:
+  - jekyll-remote-theme
+```
+
+**`index.md`:**
+```markdown
+---
+layout: default
+---
+```
+
+### 2. Copy the Wikilinks Plugin
+
+This theme requires a custom plugin for wikilinks, backlinks, and graph view. Copy [`_plugins/wikilinks.rb`](_plugins/wikilinks.rb) from this repo into your repo's `_plugins/` directory.
 
 ### 3. Deploy
 
-Done. The included `.github/workflows/pages.yml` builds and deploys automatically on push to `main`. Go to your repo's **Settings → Pages** and set the source to **GitHub Actions**.
+Push to GitHub. Go to **Settings → Pages** and set the source to **GitHub Actions**. Your site deploys automatically.
 
 ---
 
 ## Stay Updated
 
-Click the **"Sync fork"** button on your GitHub repo page. Your notes in `_notes/` and attachments are excluded from git (`.gitignore`), so they're never affected by theme updates.
-
-If you use this repo locally and want to pull updates via git:
-
-```bash
-git remote add upstream https://github.com/iamprasadraju/jekyll-obsidian-theme.git
-git fetch upstream
-git merge upstream/main
-```
-
----
-
-## Local Development (Optional)
-
-For local development with live reload:
-
-```bash
-./run.sh
-```
-
-This installs dependencies, sets up demo notes (if `_notes/` is empty), and starts the Jekyll dev server at [http://localhost:4000](http://localhost:4000).
-
-To sync your own Obsidian vault instead:
+Update the theme version in your `_config.yml`:
 
 ```yaml
-# In _config.yml
-obsidian:
-  sync:
-    vault_path: "~/Documents/MyVault"
+# Pin to a specific release (recommended for stability)
+remote_theme: "iamprasadraju/jekyll-obsidian-theme@v1.0.0"
+
+# Or use the latest from main branch
+remote_theme: "iamprasadraju/jekyll-obsidian-theme"
 ```
 
-```bash
-ruby sync.rb
-./run.sh
+Or pin via `Gemfile` for more control:
+
+```ruby
+gem "jekyll-remote-theme"
+# Then in _config.yml:
+# remote_theme: "iamprasadraju/jekyll-obsidian-theme@v1.0.0"
 ```
+
+Check [releases](https://github.com/iamprasadraju/jekyll-obsidian-theme/releases) for the latest version.
+
+> **Note:** When updating, also check if `_plugins/wikilinks.rb` has changed and copy the latest version to your repo.
 
 ---
 
@@ -428,7 +432,7 @@ jekyll-obsidian-theme/
 
 The repository includes a GitHub Actions workflow (`.github/workflows/pages.yml`) that builds and deploys automatically on push to `main`.
 
-> **Note:** Synced notes (`_notes/`) and attachments (`assets/attachments/`) are excluded from the repo via `.gitignore`. To deploy your vault notes, build locally and push `_site/`, or modify the workflow to sync during CI.
+> **Note:** If using `remote_theme`, your repo only needs `_config.yml`, `Gemfile`, `_plugins/`, `_notes/`, and `index.md`. Theme files are fetched automatically during build.
 
 ### Netlify
 
@@ -445,6 +449,20 @@ The repository includes a GitHub Actions workflow (`.github/workflows/pages.yml`
 bundle exec jekyll build
 # Output in _site/
 ```
+
+---
+
+## Local Development
+
+Clone this repo to run it locally with demo notes:
+
+```bash
+git clone https://github.com/iamprasadraju/jekyll-obsidian-theme.git
+cd jekyll-obsidian-theme
+./run.sh
+```
+
+This installs dependencies, starts the dev server with demo notes, and enables live reload at [http://localhost:4000](http://localhost:4000).
 
 ---
 
