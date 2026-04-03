@@ -369,8 +369,8 @@ module Jekyll
       @base = site.source
       @dir = "tags/#{tag}"
       @name = "index.html"
+      @extname = ".html"
 
-      process(@name)
       self.content = ""
       self.data = {
         "layout" => "tag",
@@ -388,8 +388,8 @@ module Jekyll
       @base = site.source
       @dir = "tags"
       @name = "index.html"
+      @extname = ".html"
 
-      process(@name)
       self.content = ""
       self.data = {
         "layout" => "tags",
