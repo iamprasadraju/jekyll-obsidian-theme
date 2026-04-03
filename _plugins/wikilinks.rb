@@ -370,6 +370,7 @@ module Jekyll
       @dir = "tags/#{tag}"
       @name = "index.html"
 
+      process(@name)
       self.content = ""
       self.data = {
         "layout" => "tag",
@@ -388,6 +389,7 @@ module Jekyll
       @dir = "tags"
       @name = "index.html"
 
+      process(@name)
       self.content = ""
       self.data = {
         "layout" => "tags",
