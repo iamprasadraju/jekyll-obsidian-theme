@@ -370,13 +370,14 @@ module Jekyll
       @dir = "tags/#{tag}"
       @name = "index.html"
 
-      process(@name)
-      read_yaml(File.join(@base, "_layouts"), "tag.html")
-
-      data["tag"] = tag
-      data["title"] = "##{tag}"
-      data["notes"] = note_urls
-      data["permalink"] = "/tags/#{tag}/"
+      self.content = ""
+      self.data = {
+        "layout" => "tag",
+        "tag" => tag,
+        "title" => "##{tag}",
+        "notes" => note_urls,
+        "permalink" => "/tags/#{tag}/"
+      }
     end
   end
 
@@ -387,13 +388,14 @@ module Jekyll
       @dir = "tags"
       @name = "index.html"
 
-      process(@name)
-      read_yaml(File.join(@base, "_layouts"), "tags.html")
-
-      data["title"] = "Tags"
-      data["tags"] = tags.map { |tag, urls| { "name" => tag, "count" => urls.length } }
-                         .sort_by { |t| -t["count"] }
-      data["permalink"] = "/tags/"
+      self.content = ""
+      self.data = {
+        "layout" => "tags",
+        "title" => "Tags",
+        "tags" => tags.map { |tag, urls| { "name" => tag, "count" => urls.length } }
+                          .sort_by { |t| -t["count"] },
+        "permalink" => "/tags/"
+      }
     end
   end
 
