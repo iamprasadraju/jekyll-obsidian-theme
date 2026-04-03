@@ -84,6 +84,13 @@ Go to the [jekyll-obsidian-theme](https://github.com/iamprasadraju/jekyll-obsidi
 
 This creates your own copy. All your notes stay in your repo — they're never pushed to the upstream theme.
 
+> **Cloned directly instead?** If you ran `git clone` on this repo, repoint `origin` to your own repo:
+>
+> ```bash
+> git remote set-url origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+> git push -u origin main
+> ```
+
 ### 2. Clone and Install
 
 ```bash
