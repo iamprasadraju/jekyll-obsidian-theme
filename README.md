@@ -109,9 +109,23 @@ layout: default
 ---
 ```
 
-### 2. Copy the Wikilinks Plugin
+### 2. Copy Required Files
 
-This theme requires a custom plugin for wikilinks, backlinks, and graph view. Copy [`_plugins/wikilinks.rb`](_plugins/wikilinks.rb) from this repo into your repo's `_plugins/` directory.
+Copy these files from the theme repo into your repo:
+
+| File | Purpose |
+|------|---------|
+| [`_plugins/wikilinks.rb`](_plugins/wikilinks.rb) | Wikilinks, backlinks, graph view (required) |
+| [`sync.rb`](sync.rb) | Sync your Obsidian vault (optional) |
+
+```bash
+# Quick copy
+mkdir -p _plugins
+curl -o _plugins/wikilinks.rb https://raw.githubusercontent.com/iamprasadraju/jekyll-obsidian-theme/main/_plugins/wikilinks.rb
+curl -o sync.rb https://raw.githubusercontent.com/iamprasadraju/jekyll-obsidian-theme/main/sync.rb
+```
+
+> **Note:** When the theme updates, copy the latest `wikilinks.rb` to your repo.
 
 ### 3. Deploy
 
