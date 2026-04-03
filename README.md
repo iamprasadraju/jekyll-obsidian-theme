@@ -144,15 +144,20 @@ Push to GitHub. The included `.github/workflows/pages.yml` builds and deploys au
 
 Your notes are safe. `_notes/` and `assets/attachments/` are in `.gitignore`, so upstream updates never touch your content.
 
-### Add the Upstream Remote (one time)
+### Quick Update (Recommended)
 
 ```bash
-git remote add upstream https://github.com/iamprasadraju/jekyll-obsidian-theme.git
+./update-theme.sh              # Fetch and merge latest upstream
+./update-theme.sh --dry-run    # Preview changes before merging
 ```
 
-### Pull Updates
+### Manual Update
 
 ```bash
+# Add upstream remote (one time)
+git remote add upstream https://github.com/iamprasadraju/jekyll-obsidian-theme.git
+
+# Pull updates
 git fetch upstream
 git merge upstream/main
 ```
@@ -170,14 +175,14 @@ git merge upstream/main
 
 ### Merge Conflicts
 
-If you edited `_config.yml` or `index.md`, you may get merge conflicts. Resolve them manually:
+If you edited theme files like `_config.yml` or `_layouts/`, you may get conflicts. The update script will list them for you. To resolve:
 
 ```bash
-# After merge, check for conflicts
-git status
-
 # Edit conflicted files, then
 git add . && git commit -m "Resolve upstream merge"
+
+# Or abort the merge
+git merge --abort
 ```
 
 To avoid conflicts with `_config.yml`, keep your site-specific settings (title, url, baseurl) at the top and don't modify the `obsidian:` block unless you know what changed upstream.
