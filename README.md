@@ -15,7 +15,8 @@
 
   [Features](#features) &bull;
   [Getting Started](#getting-started) &bull;
-  [Stay Updated](#stay-updated-with-upstream) &bull;
+  [Stay Updated](#stay-updated) &bull;
+  [Local Development](#local-development-optional) &bull;
   [Sync Your Vault](#sync-your-obsidian-vault) &bull;
   [Configuration](#configuration) &bull;
   [Customization](#customization) &bull;
@@ -82,29 +83,11 @@
 
 Go to the [jekyll-obsidian-theme](https://github.com/iamprasadraju/jekyll-obsidian-theme) repo and click **"Use this template"** → **"Create a new repository"**.
 
-This creates your own copy. All your notes stay in your repo — they're never pushed to the upstream theme.
+Your notes stay in your repo — they're never pushed to the upstream theme.
 
-> **Cloned directly instead?** If you ran `git clone` on this repo, repoint `origin` to your own repo:
->
-> ```bash
-> git remote set-url origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
-> git push -u origin main
-> ```
+### 2. Configure Your Site
 
-### 2. Clone and Install
-
-```bash
-# Clone your new repository
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
-cd YOUR_REPO
-
-# Install dependencies
-bundle install
-```
-
-### 3. Configure Your Site
-
-Edit `_config.yml`:
+Edit `_config.yml` directly on GitHub:
 
 ```yaml
 title: "My Vault"                          # Your site title
@@ -112,9 +95,37 @@ baseurl: ""                                # Root path (e.g. "/blog" for subfold
 url: "https://yourusername.github.io"      # Your site URL
 ```
 
-### 4. Add Your Notes
+### 3. Deploy
 
-**Option A — Sync from your Obsidian vault:**
+Done. The included `.github/workflows/pages.yml` builds and deploys automatically on push to `main`. Go to your repo's **Settings → Pages** and set the source to **GitHub Actions**.
+
+---
+
+## Stay Updated
+
+Click the **"Sync fork"** button on your GitHub repo page. Your notes in `_notes/` and attachments are excluded from git (`.gitignore`), so they're never affected by theme updates.
+
+If you use this repo locally and want to pull updates via git:
+
+```bash
+git remote add upstream https://github.com/iamprasadraju/jekyll-obsidian-theme.git
+git fetch upstream
+git merge upstream/main
+```
+
+---
+
+## Local Development (Optional)
+
+For local development with live reload:
+
+```bash
+./run.sh
+```
+
+This installs dependencies, sets up demo notes (if `_notes/` is empty), and starts the Jekyll dev server at [http://localhost:4000](http://localhost:4000).
+
+To sync your own Obsidian vault instead:
 
 ```yaml
 # In _config.yml
@@ -125,74 +136,8 @@ obsidian:
 
 ```bash
 ruby sync.rb
+./run.sh
 ```
-
-**Option B — Install demo notes to explore the theme:**
-
-```bash
-ruby sync.rb setup
-```
-
-### 5. Run Locally
-
-```bash
-bundle exec jekyll serve --livereload
-```
-
-Open [http://localhost:4000](http://localhost:4000) to see your site.
-
-### 6. Deploy
-
-Push to GitHub. The included `.github/workflows/pages.yml` builds and deploys automatically on push to `main`. Go to your repo's **Settings → Pages** and set the source to **GitHub Actions**.
-
----
-
-## Stay Updated with Upstream
-
-Your notes are safe. `_notes/` and `assets/attachments/` are in `.gitignore`, so upstream updates never touch your content.
-
-### Quick Update (Recommended)
-
-```bash
-./update-theme.sh              # Fetch and merge latest upstream
-./update-theme.sh --dry-run    # Preview changes before merging
-```
-
-### Manual Update
-
-```bash
-# Add upstream remote (one time)
-git remote add upstream https://github.com/iamprasadraju/jekyll-obsidian-theme.git
-
-# Pull updates
-git fetch upstream
-git merge upstream/main
-```
-
-### What Gets Updated
-
-| Updated (theme files) | Untouched (your content) |
-|-----------------------|--------------------------|
-| `_layouts/` | `_notes/` |
-| `_includes/` | `assets/attachments/` |
-| `_sass/` | `_site/` |
-| `_plugins/` | `.jekyll-cache/` |
-| `assets/js/` | |
-| `Gemfile` | |
-
-### Merge Conflicts
-
-If you edited theme files like `_config.yml` or `_layouts/`, you may get conflicts. The update script will list them for you. To resolve:
-
-```bash
-# Edit conflicted files, then
-git add . && git commit -m "Resolve upstream merge"
-
-# Or abort the merge
-git merge --abort
-```
-
-To avoid conflicts with `_config.yml`, keep your site-specific settings (title, url, baseurl) at the top and don't modify the `obsidian:` block unless you know what changed upstream.
 
 ---
 

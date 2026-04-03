@@ -1,8 +1,15 @@
 #!/bin/bash
 # Obsidian Theme - Dev Server
-# Syncs vault (if configured) then starts Jekyll with live reload
+# Installs deps, syncs vault (or demo notes), starts Jekyll with live reload
 
 cd "$(dirname "$0")"
+
+# Install dependencies if needed
+if ! bundle check &>/dev/null; then
+  echo "Installing dependencies..."
+  bundle install
+  echo ""
+fi
 
 # Check if vault_path is configured
 VAULT_PATH=$(ruby -ryaml -e "p = YAML.safe_load(File.read('_config.yml'), permitted_classes: [Date]).dig('obsidian','sync','vault_path') || ''; puts p.empty? ? '' : File.expand_path(p)" 2>/dev/null)
